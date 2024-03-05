@@ -59,6 +59,6 @@ class OrderService
             );
         }
 
-        return $this->cancelOrder($orderId);
+        return $this->orderRepository->cancelOrder($orderId);
     }
 }
