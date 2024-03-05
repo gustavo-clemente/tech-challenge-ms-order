@@ -5,18 +5,24 @@ declare(strict_types=1);
 namespace App\Domain\Order\Entity\Item;
 
 use App\Domain\Order\Exception\InvalidItemQuantityException;
-use App\Domain\Product\Entity\ProductId;
+use App\Domain\Order\ValueObject\Item\OrderItemId;
+use App\Domain\Product\ValueObject\ProductId;
 
-class OrderItem implements
+class OrderItem
 {
     public function __construct(
         private ProductId $productId,
         private int $quantity,
         private int $priceInCents,
-        private ?OrderItemId $id,
-        private ?int $discountInCents
+        private ?OrderItemId $id = null,
+        private ?int $discountInCents = null
     ){
         $this->validate();
+    }
+
+    public function getProductId(): ProductId
+    {
+        return $this->productId;
     }
 
     public function getQuantity(): int
