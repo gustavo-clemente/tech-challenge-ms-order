@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Order\Entity\Item;
 
-use App\Domain\Order\Exception\DuplicateProductItemException;
 use App\Domain\Shared\Collection;
 use App\Domain\Order\Entity\Item\OrderItem;
+use App\Domain\Order\Exception\Item\DuplicateProductItemException;
 
 /** @method OrderItem current() */
 class OrderItemCollection extends Collection

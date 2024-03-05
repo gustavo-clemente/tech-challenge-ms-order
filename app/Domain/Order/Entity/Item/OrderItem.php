@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Order\Entity\Item;
 
-use App\Domain\Order\Exception\InvalidItemQuantityException;
+use App\Domain\Order\Exception\Item\InvalidItemQuantityException;
 use App\Domain\Order\ValueObject\Item\OrderItemId;
 use App\Domain\Product\ValueObject\ProductId;
 

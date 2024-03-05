@@ -14,23 +14,33 @@ abstract class Collection implements Iterator
     ){
     }
 
-    public function rewind(): void {
+    public function rewind(): void
+    {
         $this->position = 0;
     }
 
-    public function current(): mixed {
+    public function current(): mixed
+    {
         return $this->data[$this->position];
     }
 
-    public function key(): mixed {
+    public function key(): mixed
+    {
         return $this->position;
     }
 
-    public function next(): void {
+    public function next(): void
+    {
         ++$this->position;
     }
 
-    public function valid(): bool {
+    public function valid(): bool
+    {
         return isset($this->data[$this->position]);
+    }
+
+    public function count(): int
+    {
+        return count($this->data);
     }
 }

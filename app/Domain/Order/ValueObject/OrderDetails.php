@@ -13,10 +13,25 @@ class OrderDetails
 {
     public function __construct(
         private OrderItemCollection $items,
-        private ?OrderStatus $orderStatus,
-        private ?CustomerId $customerId,
-        private ?DateTime $previsionDeliveryDate,
+        private ?OrderStatus $orderStatus = null,
+        private ?CustomerId $customerId = null,
+        private ?DateTime $previsionDeliveryDate = null,
     ){
         
+    }
+
+    public function getItems(): OrderItemCollection
+    {
+        return $this->items;
+    }
+
+    public function getTotalItems(): int
+    {
+        return $this->items->count();
+    }
+
+    public function getOrderStatus(): OrderStatus
+    {
+        return $this->orderStatus;
     }
 }

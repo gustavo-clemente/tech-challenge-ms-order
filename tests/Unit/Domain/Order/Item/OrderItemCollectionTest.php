@@ -6,13 +6,13 @@ namespace Tests\Unit\Domain\Order\Item;
 
 use App\Domain\Order\Entity\Item\OrderItem;
 use App\Domain\Order\Entity\Item\OrderItemCollection;
-use App\Domain\Order\Exception\DuplicateProductItemException;
+use App\Domain\Order\Exception\Item\DuplicateProductItemException;
 use App\Domain\Product\ValueObject\ProductId;
 use Tests\TestCase;
 
 class OrderItemCollectionTest extends TestCase
 {
-    public function test_it_cant_be_created_with_duplicate_product_id(): void
+    public function test_order_item_collection_cannot_be_created_with_duplicate_product_id(): void
     {
         $this->expectException(DuplicateProductItemException::class);
 
