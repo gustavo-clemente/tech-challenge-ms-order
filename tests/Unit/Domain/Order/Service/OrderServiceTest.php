@@ -306,4 +306,138 @@ class OrderServiceTest extends TestCase
 
         return $cases;
     }
+
+    public function test_add_order_items_return_order(): void
+    {
+        $orderItems = new OrderItemCollection([
+            new OrderItem(
+                productId: new ProductId('111'),
+                quantity:1,
+                priceInCents:1000
+            )
+        ]);
+
+        $order = new Order(
+            orderId: new OrderId('111'),
+            storeId: new StoreId('111'),
+            orderDetails: new OrderDetails(
+                items: $orderItems
+            )
+        );
+
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order, $orderItems){
+            $mock
+              ->shouldReceive('getOrderById')
+              ->once()
+              ->with($order->getOrderId())
+              ->andReturn($order);
+
+            $mock
+              ->shouldReceive('addOrderItems')
+              ->once()
+              ->with($order->getOrderId(), $orderItems)
+              ->andReturn($order);
+        });
+
+        $order = app(OrderService::class)->addOrderItems($order->getOrderId(), $orderItems);
+
+        $this->assertInstanceOf(Order::class, $order);
+    }
+
+    public function test_add_order_items_throw_when_order_id_not_found(): void
+    {
+        $this->expectException(OrderNotFoundException::class);
+
+        $orderId = new OrderId("111");
+
+        $orderItems = new OrderItemCollection([
+            new OrderItem(
+                productId: new ProductId('111'),
+                quantity:1,
+                priceInCents:1000
+            )
+        ]);
+        
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use($orderId){
+            $mock
+              ->shouldReceive('getOrderById')
+              ->once()
+              ->with($orderId)
+              ->andReturn(null);
+
+              $mock
+              ->shouldNotReceive('addOrderItems');
+        });
+
+        $order = app(OrderService::class)->addOrderItems($orderId, $orderItems);
+
+        $this->assertNull($order);
+    }
+
+    public function test_remove_order_items_returns_order(): void
+    {
+        $orderItems = new OrderItemCollection([
+            new OrderItem(
+                productId: new ProductId('111'),
+                quantity:1,
+                priceInCents:1000
+            )
+        ]);
+
+        $order = new Order(
+            orderId: new OrderId('111'),
+            storeId: new StoreId('111'),
+            orderDetails: new OrderDetails(
+                items: $orderItems
+            )
+        );
+
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order, $orderItems){
+            $mock
+              ->shouldReceive('getOrderById')
+              ->once()
+              ->with($order->getOrderId())
+              ->andReturn($order);
+
+            $mock
+              ->shouldReceive('removeOrderItems')
+              ->once()
+              ->with($order->getOrderId(), $orderItems)
+              ->andReturn($order);
+        });
+
+        $order = app(OrderService::class)->removeOrderItems($order->getOrderId(), $orderItems);
+
+        $this->assertInstanceOf(Order::class, $order);
+    }
+
+    public function test_remove_order_items_throw_when_order_id_not_found(): void
+    {
+        $this->expectException(OrderNotFoundException::class);
+
+        $orderId = new OrderId("111");
+
+        $orderItems = new OrderItemCollection([
+            new OrderItem(
+                productId: new ProductId('111'),
+                quantity:1,
+                priceInCents:1000
+            )
+        ]);
+        
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use($orderId){
+            $mock
+              ->shouldReceive('getOrderById')
+              ->once()
+              ->with($orderId)
+              ->andReturn(null);
+
+              $mock
+              ->shouldNotReceive('removeOrderItems');
+        });
+
+        $order = app(OrderService::class)->removeOrderItems($orderId, $orderItems);
+
+        $this->assertNull($order);
+    }
 }

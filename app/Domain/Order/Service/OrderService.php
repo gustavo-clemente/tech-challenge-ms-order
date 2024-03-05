@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Order\Service;
 
+use App\Domain\Order\Entity\Item\OrderItemCollection;
 use App\Domain\Order\Entity\Order;
 use App\Domain\Order\Enum\OrderStatus;
 use App\Domain\Order\Exception\CheckoutOrderStatusException;
@@ -60,5 +61,19 @@ class OrderService
         }
 
         return $this->orderRepository->cancelOrder($orderId);
+    }
+
+    public function addOrderItems(OrderId $orderId, OrderItemCollection $items): Order
+    {
+        $order = $this->getOrderById($orderId);
+
+        return $this->orderRepository->addOrderItems($order->getOrderId(), $items);
+    }
+
+    public function removeOrderItems(OrderId $orderId, OrderItemCollection $items): Order
+    {
+        $order = $this->getOrderById($orderId);
+
+        return $this->orderRepository->removeOrderItems($order->getOrderId(), $items);
     }
 }
