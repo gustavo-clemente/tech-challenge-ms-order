@@ -4,17 +4,21 @@ declare(strict_types= 1);
 
 namespace App\Domain\Order\Entity;
 
-use App\Domain\Customer\Entity\CustomerId;
-use App\Domain\Order\Enum\OrderStatus;
+use App\Domain\Order\ValueObject\OrderDetails;
+use App\Domain\Order\ValueObject\OrderId;
+use App\Domain\Order\ValueObject\OrderPaymentDetails;
 use App\Domain\Store\Entity\StoreId;
+use DateTime;
 
 class Order
 {
     public function __construct(
-        private OrderId $orderId,
         private StoreId $storeId,
-        private CustomerId $customerId,
-        private OrderStatus $orderStatus
+        private OrderDetails $orderDetails,
+        private ?OrderId $orderId,
+        private ?DateTime $createdAt,
+        private ?OrderPaymentDetails $orderPaymentDetails
+
     ){
     }
 }
