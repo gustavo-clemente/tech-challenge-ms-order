@@ -7,12 +7,12 @@ namespace App\Domain\Shared\ValueObject;
 abstract class Identifier implements \JsonSerializable
 {
     public function __construct(
-        private string $id
+        private int|string $id
     ){
 
     }
 
-    public function getIdentifer(): string
+    public function getIdentifier(): int|string
     {
         return $this->id;
     }

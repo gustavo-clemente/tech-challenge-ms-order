@@ -25,8 +25,8 @@ class OrderServiceTest extends TestCase
     public function test_createOrder_return_order(): void
     {
         $order = new Order(
-            storeId: new StoreId('111'),
             orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
@@ -54,8 +54,8 @@ class OrderServiceTest extends TestCase
     {
         $order = new Order(
             orderId: new OrderId("111"),
-            storeId: new StoreId('111'),
             orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
@@ -102,8 +102,8 @@ class OrderServiceTest extends TestCase
     {
         $order = new Order(
             orderId: new OrderId("111"),
-            storeId: new StoreId('111'),
             orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
@@ -166,8 +166,8 @@ class OrderServiceTest extends TestCase
         $this->expectException(CheckoutOrderStatusException::class);
         $order = new Order(
             orderId: new OrderId("111"),
-            storeId: new StoreId('111'),
             orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
@@ -199,8 +199,8 @@ class OrderServiceTest extends TestCase
     {
         $order = new Order(
             orderId: new OrderId("111"),
-            storeId: new StoreId('111'),
             orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
@@ -263,8 +263,8 @@ class OrderServiceTest extends TestCase
         $this->expectException(OrderNotCancelableException::class);
         $order = new Order(
             orderId: new OrderId("111"),
-            storeId: new StoreId('111'),
             orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
@@ -319,8 +319,8 @@ class OrderServiceTest extends TestCase
 
         $order = new Order(
             orderId: new OrderId('111'),
-            storeId: new StoreId('111'),
             orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
                 items: $orderItems
             )
         );
@@ -386,8 +386,8 @@ class OrderServiceTest extends TestCase
 
         $order = new Order(
             orderId: new OrderId('111'),
-            storeId: new StoreId('111'),
             orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
                 items: $orderItems
             )
         );

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domain\Shared;
 
+use Countable;
 use Iterator;
 
-abstract class Collection implements Iterator
+abstract class Collection implements Iterator, Countable
 {
     private $position = 0;
     public function __construct(
@@ -43,4 +44,5 @@ abstract class Collection implements Iterator
     {
         return count($this->data);
     }
+    
 }

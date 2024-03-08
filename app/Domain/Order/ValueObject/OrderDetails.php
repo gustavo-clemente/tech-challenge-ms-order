@@ -7,11 +7,13 @@ namespace App\Domain\Order\ValueObject;
 use App\Domain\Customer\Entity\CustomerId;
 use App\Domain\Order\Entity\Item\OrderItemCollection;
 use App\Domain\Order\Enum\OrderStatus;
+use App\Domain\Store\Entity\StoreId;
 use DateTime;
 
-class OrderDetails
+class OrderDetails implements \JsonSerializable
 {
     public function __construct(
+        private StoreId $storeId,
         private OrderItemCollection $items,
         private ?OrderStatus $orderStatus = null,
         private ?CustomerId $customerId = null,
@@ -33,5 +35,31 @@ class OrderDetails
     public function getOrderStatus(): OrderStatus
     {
         return $this->orderStatus;
+    }
+
+    public function getStoreId(): StoreId
+    {
+        return $this->storeId;
+    }
+
+    public function getCustomerId(): CustomerId
+    {
+        return $this->customerId;
+    }
+
+    public function getPrevisionDeliveryDate(): ?DateTime
+    {
+        return $this->previsionDeliveryDate;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'storeId' => $this->storeId->getIdentifier(),
+            'items' => $this->items->jsonSerialize(),
+            'orderStatus' => $this->orderStatus?->value,
+            'customerId' => $this->customerId?->getIdentifier(),
+            'previsionDeliveryDate' => $this->previsionDeliveryDate?->format('Y-m-d H:i:s')
+        ];
     }
 }
