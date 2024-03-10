@@ -4,6 +4,7 @@ declare(strict_types= 1);
 
 namespace App\Application\Order\Input;
 
+use App\Application\Mapper\OrderItemMapper;
 use App\Domain\Order\Entity\Item\OrderItem;
 use App\Domain\Order\Entity\Item\OrderItemCollection;
 use App\Domain\Order\ValueObject\OrderId;
@@ -28,16 +29,8 @@ class OrderItemsInput
     public function getOrderItems(): OrderItemCollection
     {
         $dataItems = $this->data["items"];
-        $orderItems = [];
-
-        foreach($dataItems as $item){
-            $orderItems[] = new OrderItem(
-                productId: new ProductId($item['productId']),
-                quantity: $item['quantity']
-            );
-        }
-
-        return new OrderItemCollection($orderItems);
+        
+        return OrderItemMapper::mapToCollection($dataItems);
     }
 
     private function validate(): void
