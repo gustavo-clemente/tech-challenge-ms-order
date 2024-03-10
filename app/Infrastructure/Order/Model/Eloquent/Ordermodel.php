@@ -3,14 +3,18 @@
 declare(strict_types=1);
 
 namespace App\Infrastructure\Order\Model\Eloquent;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Ordermodel extends Model
+class OrderModel extends Model
 {
-    protected string $table = 'orders';
+    use HasUlids;
+    
+    protected $table = 'orders';
 
-    protected array $fillable = [
+    protected $fillable = [
+        'id',
         'store_id',
         'customer_id',
         'prevision_delivery_date',
@@ -22,4 +26,5 @@ class Ordermodel extends Model
     {
         return $this->hasMany(OrderItemModel::class, 'order_id');
     }
+    
 }

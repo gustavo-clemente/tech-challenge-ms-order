@@ -17,27 +17,27 @@ class EloquentOrderPaymentMapperTest extends TestCase
      */
     public function test_map_model_to_domain_return_correct_order_details(string $status): void
     {
-            $orderPaymentModel = $this->createOrderPaymentModelMock(
-                orderId: uniqid(),
-                externalPaymentOrderId: uniqid(),
-                status: $status
-            );
+        $orderPaymentModel = $this->createOrderPaymentModelMock(
+            orderId: uniqid(),
+            externalPaymentOrderId: uniqid(),
+            status: $status
+        );
 
-            $orderPaymentDetails = app(EloquentOrderPaymentMapper::class)->mapToDomain($orderPaymentModel);
+        $orderPaymentDetails = app(EloquentOrderPaymentMapper::class)->mapToDomain($orderPaymentModel);
 
-            $this->assertInstanceOf(OrderPaymentDetails::class, $orderPaymentDetails);
-            $this->assertEquals(
-                $orderPaymentModel->external_payment_id,
-                $orderPaymentDetails->getExternalPaymentId()->getIdentifier()
-            );
-            $this->assertEquals($orderPaymentModel->status, $orderPaymentDetails->getPaymentStatus()->value);
+        $this->assertInstanceOf(OrderPaymentDetails::class, $orderPaymentDetails);
+        $this->assertEquals(
+            $orderPaymentModel->external_payment_id,
+            $orderPaymentDetails->getExternalPaymentId()->getIdentifier()
+        );
+        $this->assertEquals($orderPaymentModel->status, $orderPaymentDetails->getPaymentStatus()->value);
     }
 
-    public function provide_payment_status(): array
+    public static function provide_payment_status(): array
     {
         $testCases = [];
 
-        foreach(PaymentStatus::cases() as $case){
+        foreach (PaymentStatus::cases() as $case) {
             $testCases[$case->value] = [$case->value];
         }
 
@@ -51,21 +51,23 @@ class EloquentOrderPaymentMapperTest extends TestCase
     ): OrderPaymentModel {
         /** @var OrderPaymentModel */
         $orderPaymentModel = $this
-                              ->getMockBuilder(OrderPaymentModel::class)
-                              ->disableOriginalConstructor()
-                              ->getMock();
-        
+            ->getMockBuilder(OrderPaymentModel::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
         $orderPaymentModel
-          ->method('__get')
-          ->willReturnCallback(function ($property) use(
-            $orderId, $externalPaymentOrderId, $status
-        ){
-            return match($property){
-                'order_id' => $orderId,
-                'external_payment_id' => $externalPaymentOrderId,
-                'status' => $status
-            };
-        });
+            ->method('__get')
+            ->willReturnCallback(function ($property) use (
+                $orderId,
+                $externalPaymentOrderId,
+                $status
+            ) {
+                return match ($property) {
+                    'order_id' => $orderId,
+                    'external_payment_id' => $externalPaymentOrderId,
+                    'status' => $status
+                };
+            });
 
         return $orderPaymentModel;
     }

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_payment', function (Blueprint $table) {
+        Schema::create('order_payments', function (Blueprint $table) {
             $table->uuid()->primary();
             $table->foreignUuid('order_id')->references('id')->on('orders')->cascadeOnDelete();
             $table->uuid('external_payment_id');

@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Order\Model\Eloquent;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class OrderItemModel extends Model
 {
-    protected string $table = 'order_items';
+    use HasUuids;
+    protected $table = 'order_items';
 
-    protected array $fillable = [
+    protected $fillable = [
+        'id',
         'product_id',
         'order_id',
         'quantity',
