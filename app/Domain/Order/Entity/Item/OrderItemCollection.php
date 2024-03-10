@@ -9,7 +9,7 @@ use App\Domain\Order\Entity\Item\OrderItem;
 use App\Domain\Order\Exception\Item\DuplicateProductItemException;
 
 /** @method OrderItem current() */
-class OrderItemCollection extends Collection
+class OrderItemCollection extends Collection implements \JsonSerializable
 {
     public function __construct(array $data){
         parent::__construct($data);
@@ -22,7 +22,7 @@ class OrderItemCollection extends Collection
         $productIds = [];
         
         foreach($this as $orderItem){
-            $itemProductIdentifier = $orderItem->getProductId()->getIdentifer();
+            $itemProductIdentifier = $orderItem->getProductId()->getIdentifier();
 
             if(in_array($itemProductIdentifier, $productIds)){
                 throw new DuplicateProductItemException(
@@ -33,5 +33,15 @@ class OrderItemCollection extends Collection
 
             $productIds[] = $itemProductIdentifier;
         }
+    }
+    public function jsonSerialize(): array
+    {
+        $items = [];
+
+        foreach($this as $item){
+            $items[] = $item->jsonSerialize();
+        }
+
+        return $items;
     }
 }

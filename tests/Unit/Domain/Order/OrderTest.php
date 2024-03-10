@@ -18,8 +18,8 @@ class OrderTest extends TestCase
         $this->expectException(EmptyOrderException::class);
 
         $order = new Order(
-            storeId: new StoreId("111"),
             orderDetails:new OrderDetails(
+                storeId: new StoreId("111"),
                 items: new OrderItemCollection([])
             )
         );
