@@ -17,7 +17,7 @@ class RemoveOrderItemsApplication
     public function removeOrderItems(OrderItemsInput $orderItemsInput): OrderOutput
     {
         $order = $this->orderService->removeOrderItems(
-            $orderItemsInput->getOrderId(), 
+            $orderItemsInput->getOrderId(),
             $orderItemsInput->getOrderItems()
         );
 
