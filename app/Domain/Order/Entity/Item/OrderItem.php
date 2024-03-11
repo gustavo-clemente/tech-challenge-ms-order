@@ -20,7 +20,7 @@ class OrderItem implements \JsonSerializable
         $this->validate();
     }
 
-    public function getId(): OrderItemId
+    public function getId(): ?OrderItemId
     {
         return $this->id;
     }
@@ -39,7 +39,7 @@ class OrderItem implements \JsonSerializable
         return $this->priceInCents;
     }
 
-    public function getDiscountInCents(): int
+    public function getDiscountInCents(): ?int
     {
         return $this->discountInCents;
     }

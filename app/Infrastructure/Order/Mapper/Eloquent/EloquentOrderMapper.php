@@ -22,6 +22,8 @@ class EloquentOrderMapper
     }
     public function mapToDomain(OrderModel $orderModel): Order
     {
+        $previsionDeliveryDate = $orderModel->prevision_delivery_date;
+
         return new Order(
             orderId: new OrderId($orderModel->id),
             orderDetails: new OrderDetails(
@@ -29,7 +31,9 @@ class EloquentOrderMapper
                 customerId: new CustomerId($orderModel->customer_id),
                 items: $this->orderitemMapper->mapToDomainCollection($orderModel->items),
                 orderStatus: OrderStatus::from($orderModel->status),
-                previsionDeliveryDate: new \DateTime($orderModel->prevision_delivery_date->toDateTimeString())
+                previsionDeliveryDate: $previsionDeliveryDate ?
+                                       new \DateTime($previsionDeliveryDate) :
+                                       null
             ),
             createdAt: new \DateTime($orderModel->created_at->toDateTimeString()),
         );
@@ -37,13 +41,17 @@ class EloquentOrderMapper
 
     public function mapToModel(Order $order): OrderModel
     {
+        $orderStatus = $order->getOrderDetails()->getOrderStatus();
+
         return new OrderModel([
-            "id" => $order->getOrderId()->getIdentifier(),
+            "id" => $order->getOrderId()?->getIdentifier(),
             "store_id" => $order->getOrderDetails()->getStoreId()->getIdentifier(),
             "customer_id" => $order->getOrderDetails()->getCustomerId()->getIdentifier(),
-            "items" => $this->orderitemMapper->mapToModelCollection($order->getOrderDetails()->getItems()),
-            "status" => $order->getOrderDetails()->getOrderStatus()->value,
-            "prevision_delivery_date" =>  Carbon::parse($order->getOrderDetails()->getPrevisionDeliveryDate())
+            "status" => $orderStatus ? $orderStatus->value : OrderStatus::CREATED->value,
+            "prevision_delivery_date" =>  $order->getOrderDetails()->getPrevisionDeliveryDate() ?
+                                          Carbon::parse($order->getOrderDetails()->getPrevisionDeliveryDate()) :
+                                          null
         ]);
     }
+    
 }

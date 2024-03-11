@@ -3,13 +3,17 @@
 declare(strict_types=1);
 
 namespace App\Infrastructure\Order\Model\Eloquent;
+
+use Database\Factories\Order\OrderFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderModel extends Model
 {
-    use HasUlids;
+    use HasUlids, HasFactory;
     
     protected $table = 'orders';
 
@@ -26,5 +30,9 @@ class OrderModel extends Model
     {
         return $this->hasMany(OrderItemModel::class, 'order_id');
     }
-    
+
+    protected static function newFactory(): Factory
+    {
+        return OrderFactory::new();
+    }
 }

@@ -7,6 +7,7 @@ namespace Tests\Unit\Infrastructure\Order\Mapper\Eloquent;
 use App\Domain\Order\Entity\Item\OrderItem;
 use App\Domain\Order\Entity\Item\OrderItemCollection;
 use App\Domain\Order\ValueObject\Item\OrderItemId;
+use App\Domain\Order\ValueObject\OrderId;
 use App\Domain\Product\ValueObject\ProductId;
 use App\Infrastructure\Order\Mapper\Eloquent\EloquentOrderitemMapper;
 use App\Infrastructure\Order\Model\Eloquent\OrderItemModel;
@@ -17,9 +18,11 @@ class EloquentOrderItemMapperTest extends TestCase
 {
     public function test_map_to_domain_return_correct_order_item(): void
     {
+        $orderId = new OrderId(uniqid());
+
         $orderItemModel = $this->createOrderItemModelMock(
             orderItemId: uniqid(),
-            orderId: uniqid(),
+            orderId: $orderId->getIdentifier(),
             productId: uniqid(),
             quantity: 10,
             price_in_cents: 20000,
@@ -38,10 +41,12 @@ class EloquentOrderItemMapperTest extends TestCase
 
     public function test_map_to_domain_collection_return_correct_order_item_collection(): void
     {
+        $orderId = new OrderId(uniqid());
+
         $collection = new Collection([
             $this->createOrderItemModelMock(
                 orderItemId: uniqid(),
-                orderId: uniqid(),
+                orderId: $orderId->getIdentifier(),
                 productId: uniqid(),
                 quantity: 10,
                 price_in_cents: 20000,
@@ -49,7 +54,7 @@ class EloquentOrderItemMapperTest extends TestCase
             ),
             $this->createOrderItemModelMock(
                 orderItemId: uniqid(),
-                orderId: uniqid(),
+                orderId: $orderId->getIdentifier(),
                 productId: uniqid(),
                 quantity: 10,
                 price_in_cents: 20000,
@@ -57,7 +62,7 @@ class EloquentOrderItemMapperTest extends TestCase
             ),
             $this->createOrderItemModelMock(
                 orderItemId: uniqid(),
-                orderId: uniqid(),
+                orderId: $orderId->getIdentifier(),
                 productId: uniqid(),
                 quantity: 10,
                 price_in_cents: 20000,
@@ -73,6 +78,8 @@ class EloquentOrderItemMapperTest extends TestCase
 
     public function test_map_to_model_return_correct_order_item_model(): void
     {
+        $orderId = new OrderId(uniqid());
+
         $orderItem = new OrderItem(
             id: new OrderItemId(uniqid()),
             productId: new ProductId(uniqid()),
@@ -81,7 +88,7 @@ class EloquentOrderItemMapperTest extends TestCase
             discountInCents: 3000
         );
 
-        $orderItemModel = app(EloquentOrderitemMapper::class)->mapToModel($orderItem);
+        $orderItemModel = app(EloquentOrderitemMapper::class)->mapToModel($orderId, $orderItem);
 
         $this->assertInstanceOf(OrderItemModel::class, $orderItemModel);
         $this->assertEquals($orderItem->getId()->getIdentifier(), $orderItemModel->id);
@@ -93,6 +100,8 @@ class EloquentOrderItemMapperTest extends TestCase
 
     public function test_map_to_model_collection_return_correct_order_item_model_collection(): void
     {
+        $orderId = new OrderId(uniqid());
+
         $orderItemCollection = new OrderItemCollection([
             new OrderItem(
                 id: new OrderItemId(uniqid()),
@@ -118,7 +127,8 @@ class EloquentOrderItemMapperTest extends TestCase
 
         ]);
 
-        $orderItemModelCollection = app(EloquentOrderitemMapper::class)->mapToModelCollection($orderItemCollection);
+        $orderItemModelCollection = app(EloquentOrderitemMapper::class)
+            ->mapToModelCollection($orderId, $orderItemCollection);
 
         $this->assertInstanceOf(Collection::class, $orderItemModelCollection);
         $this->assertCount($orderItemCollection->count(), $orderItemModelCollection);

@@ -20,7 +20,6 @@ use App\Infrastructure\Order\Model\Eloquent\OrderModel;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class EloquentOrderMapperTest extends TestCase
