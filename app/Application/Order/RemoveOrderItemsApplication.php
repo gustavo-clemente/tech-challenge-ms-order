@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Order;
 
+use App\Application\Order\Input\OrderItemIdsInput;
 use App\Application\Order\Input\OrderItemsInput;
 use App\Application\Order\Output\OrderOutput;
 use App\Domain\Order\Service\OrderService;
@@ -14,11 +15,11 @@ class RemoveOrderItemsApplication
         private OrderService $orderService
     ) {}
 
-    public function removeOrderItems(OrderItemsInput $orderItemsInput): OrderOutput
+    public function removeOrderItems(OrderItemIdsInput $orderItemIdsInput): OrderOutput
     {
         $order = $this->orderService->removeOrderItems(
-            $orderItemsInput->getOrderId(),
-            $orderItemsInput->getOrderItems()
+            $orderItemIdsInput->getOrderId(),
+            $orderItemIdsInput->getOrderItemIds()
         );
 
         return new OrderOutput($order);

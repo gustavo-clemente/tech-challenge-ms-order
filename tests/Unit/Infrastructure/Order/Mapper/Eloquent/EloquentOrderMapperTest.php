@@ -33,7 +33,7 @@ class EloquentOrderMapperTest extends TestCase
             id: uniqid(),
             storeId: uniqid(),
             customerId: uniqid(),
-            previsionDeliveryDate: Carbon::now(),
+            previsionDeliveryDate: Carbon::now()->toDateTimeString(),
             items: new Collection([
                 $this->createOrderItemModelMock(
                     orderItemId: uniqid(),
@@ -124,7 +124,7 @@ class EloquentOrderMapperTest extends TestCase
         string $id,
         string $storeId,
         string $customerId,
-        Carbon $previsionDeliveryDate,
+        string $previsionDeliveryDate,
         Collection $items,
         string $status,
         Carbon $createdAt,

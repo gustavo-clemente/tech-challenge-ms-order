@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Application\Order;
 
+use App\Application\Order\Input\OrderItemIdsInput;
 use App\Application\Order\Input\OrderItemsInput;
 use App\Application\Order\Output\OrderOutput;
 use App\Application\Order\RemoveOrderItemsApplication;
@@ -50,19 +51,18 @@ class RemoveOrderItemsApplicationTest extends TestCase
         );
 
         $data = [
-            'items' => [
+            'items' =>  [
                 [
-                    "productId" => '1',
-                    "quantity" => 1
+                    'itemId' => '1'
                 ],
+
                 [
-                    "productId" => '2',
-                    "quantity" => 1
+                    'itemId' => '2'
                 ]
             ]
         ];
 
-        $orderIdInput = new OrderItemsInput('111', $data);
+        $orderIdInput = new OrderItemIdsInput('111', $data);
 
         $this->mock(OrderService::class, function (MockInterface $mock) use ($order): void {
             $mock

@@ -6,6 +6,7 @@ namespace Tests\Unit\Domain\Order\Service;
 
 use App\Domain\Order\Entity\Item\OrderItem;
 use App\Domain\Order\Entity\Item\OrderItemCollection;
+use App\Domain\Order\Entity\Item\OrderItemIdCollection;
 use App\Domain\Order\Entity\Order;
 use App\Domain\Order\Enum\OrderStatus;
 use App\Domain\Order\Exception\CheckoutOrderStatusException;
@@ -13,6 +14,7 @@ use App\Domain\Order\Exception\OrderNotCancelableException;
 use App\Domain\Order\Exception\OrderNotFoundException;
 use App\Domain\Order\Port\Repository\OrderRepository;
 use App\Domain\Order\Service\OrderService;
+use App\Domain\Order\ValueObject\Item\OrderItemId;
 use App\Domain\Order\ValueObject\OrderDetails;
 use App\Domain\Order\ValueObject\OrderId;
 use App\Domain\Product\ValueObject\ProductId;
@@ -384,6 +386,10 @@ class OrderServiceTest extends TestCase
             )
         ]);
 
+        $orderItemsIds = new OrderItemIdCollection([
+            new OrderItemId(uniqid())
+        ]);
+
         $order = new Order(
             orderId: new OrderId('111'),
             orderDetails: new OrderDetails(
@@ -392,7 +398,7 @@ class OrderServiceTest extends TestCase
             )
         );
 
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order, $orderItems){
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order, $orderItemsIds){
             $mock
               ->shouldReceive('getOrderById')
               ->once()
@@ -402,11 +408,11 @@ class OrderServiceTest extends TestCase
             $mock
               ->shouldReceive('removeOrderItems')
               ->once()
-              ->with($order->getOrderId(), $orderItems)
+              ->with($order->getOrderId(), $orderItemsIds)
               ->andReturn($order);
         });
 
-        $order = app(OrderService::class)->removeOrderItems($order->getOrderId(), $orderItems);
+        $order = app(OrderService::class)->removeOrderItems($order->getOrderId(), $orderItemsIds);
 
         $this->assertInstanceOf(Order::class, $order);
     }
@@ -417,12 +423,8 @@ class OrderServiceTest extends TestCase
 
         $orderId = new OrderId("111");
 
-        $orderItems = new OrderItemCollection([
-            new OrderItem(
-                productId: new ProductId('111'),
-                quantity:1,
-                priceInCents:1000
-            )
+        $orderItemsIds = new OrderItemIdCollection([
+            new OrderItemId(uniqid())
         ]);
         
         $this->mock(OrderRepository::class, function (MockInterface $mock) use($orderId){
@@ -436,7 +438,7 @@ class OrderServiceTest extends TestCase
               ->shouldNotReceive('removeOrderItems');
         });
 
-        $order = app(OrderService::class)->removeOrderItems($orderId, $orderItems);
+        $order = app(OrderService::class)->removeOrderItems($orderId, $orderItemsIds);
 
         $this->assertNull($order);
     }
