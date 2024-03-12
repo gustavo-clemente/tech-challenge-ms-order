@@ -32,7 +32,7 @@ class OrderDetails implements \JsonSerializable
         return $this->items->count();
     }
 
-    public function getOrderStatus(): OrderStatus
+    public function getOrderStatus(): ?OrderStatus
     {
         return $this->orderStatus;
     }
