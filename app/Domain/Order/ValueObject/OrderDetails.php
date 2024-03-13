@@ -42,7 +42,7 @@ class OrderDetails implements \JsonSerializable
         return $this->storeId;
     }
 
-    public function getCustomerId(): CustomerId
+    public function getCustomerId(): ?CustomerId
     {
         return $this->customerId;
     }

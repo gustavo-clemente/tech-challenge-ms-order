@@ -168,6 +168,7 @@ return [
         // App\Infrastructure\Laravel\Providers\BroadcastServiceProvider::class,
         App\Infrastructure\Laravel\Providers\EventServiceProvider::class,
         App\Infrastructure\Laravel\Providers\RouteServiceProvider::class,
+        App\Infrastructure\Order\Provider\OrderServiceProvider::class
     ])->toArray(),
 
     /*
