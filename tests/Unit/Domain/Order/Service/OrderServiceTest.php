@@ -17,6 +17,11 @@ use App\Domain\Order\Service\OrderService;
 use App\Domain\Order\ValueObject\Item\OrderItemId;
 use App\Domain\Order\ValueObject\OrderDetails;
 use App\Domain\Order\ValueObject\OrderId;
+use App\Domain\Product\Entity\Product;
+use App\Domain\Product\Entity\ProductCollection;
+use App\Domain\Product\Entity\ProductIdCollection;
+use App\Domain\Product\Port\MsAdapter\ProductMsAdapter;
+use App\Domain\Product\ValueObject\ProductCategoryId;
 use App\Domain\Product\ValueObject\ProductId;
 use App\Domain\Store\Entity\StoreId;
 use Mockery\MockInterface;
@@ -26,19 +31,50 @@ class OrderServiceTest extends TestCase
 {
     public function test_createOrder_return_order(): void
     {
+        $productIds = [
+            new ProductId('111'),
+            new ProductId('222')
+        ];
+
+        $productCollection = new ProductCollection([
+            new Product(
+                productId: $productIds[0],
+                categoryId: new ProductCategoryId("1"),
+                name: "Product 1",
+                priceInCents: 20000
+            ),
+            new Product(
+                productId: $productIds[1],
+                categoryId: new ProductCategoryId("2"),
+                name: "Product 2",
+                priceInCents: 30000
+            ),
+        ]);
+
+        $productIdsColection = new ProductIdCollection($productIds);
+
         $order = new Order(
             orderDetails: new OrderDetails(
                 storeId: new StoreId('111'),
                 items: new OrderItemCollection([
                     new OrderItem(
-                        productId: new ProductId('111'),
-                        quantity:1,
-                        priceInCents: 10000
+                        productId: $productIds[0],
+                        quantity:1
+                    ),
+                    new OrderItem(
+                        productId: $productIds[1],
+                        quantity:1
                     )
                 ])
             )
         );
 
+        $this->mock(ProductMsAdapter::class, function(MockInterface $mock) use($productCollection){
+            $mock
+              ->shouldReceive('getProductsById')
+              ->once()
+              ->andReturn($productCollection);
+        });
         $this->mock(OrderRepository::class, function (MockInterface $mock) use($order){
             $mock
               ->shouldReceive("createOrder")
@@ -50,6 +86,67 @@ class OrderServiceTest extends TestCase
         $order = app(OrderService::class)->createOrder($order);
 
         $this->assertInstanceOf(Order::class, $order);
+    }
+
+    public function test_populate_order_Items_price_prices_populate_order_with_prices(): void
+    {
+        $productsForTest = [
+            [
+                "id" => new ProductId('111'),
+                "price" => 20000
+            ],
+            [
+                "id" => new ProductId('222'),
+                "price" => 3000
+            ]
+        ];
+
+        $productCollection = new ProductCollection([
+            new Product(
+                productId: $productsForTest[0]['id'],
+                categoryId: new ProductCategoryId("1"),
+                name: "Product 1",
+                priceInCents: $productsForTest[0]['price']
+            ),
+            new Product(
+                productId: $productsForTest[1]['id'],
+                categoryId: new ProductCategoryId("2"),
+                name: "Product 2",
+                priceInCents: $productsForTest[1]['price']
+            ),
+        ]);
+
+        $order = new Order(
+            orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
+                items: new OrderItemCollection([
+                    new OrderItem(
+                        productId: $productsForTest[0]['id'],
+                        quantity:1
+                    ),
+                    new OrderItem(
+                        productId: $productsForTest[1]['id'],
+                        quantity:1
+                    )
+                ])
+            )
+        );
+
+        $this->mock(ProductMsAdapter::class, function(MockInterface $mock) use($productCollection){
+            $mock
+              ->shouldReceive('getProductsById')
+              ->once()
+              ->andReturn($productCollection);
+        });
+      
+        $orderPopulated = app(OrderService::class)->populateOrderItemsPrice($order);
+
+        $this->assertInstanceOf(Order::class, $order);
+        $this->assertCount($order->getOrderDetails()->getItems()->count(), $orderPopulated->getOrderDetails()->getItems());
+
+        foreach($orderPopulated->getOrderDetails()->getItems() as $index => $item){
+            $this->assertEquals($productsForTest[$index]['price'], $item->getPriceInCents());
+        }
     }
 
     public function test_get_order_by_id_return_order(): void

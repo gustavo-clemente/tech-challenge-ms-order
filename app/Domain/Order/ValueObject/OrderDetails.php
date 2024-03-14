@@ -7,6 +7,7 @@ namespace App\Domain\Order\ValueObject;
 use App\Domain\Customer\Entity\CustomerId;
 use App\Domain\Order\Entity\Item\OrderItemCollection;
 use App\Domain\Order\Enum\OrderStatus;
+use App\Domain\Product\Entity\ProductIdCollection;
 use App\Domain\Store\Entity\StoreId;
 use DateTime;
 
@@ -50,6 +51,17 @@ class OrderDetails implements \JsonSerializable
     public function getPrevisionDeliveryDate(): ?DateTime
     {
         return $this->previsionDeliveryDate;
+    }
+
+    public function getProductIds(): ProductIdCollection
+    {
+        $productIds = [];
+
+        foreach($this->items as $item) {
+            $productIds[] = $item->getProductId();
+        }
+
+        return new ProductIdCollection($productIds);
     }
 
     public function jsonSerialize(): array

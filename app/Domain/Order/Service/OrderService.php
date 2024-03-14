@@ -13,17 +13,20 @@ use App\Domain\Order\Exception\OrderNotCancelableException;
 use App\Domain\Order\Exception\OrderNotFoundException;
 use App\Domain\Order\Port\Repository\OrderRepository;
 use App\Domain\Order\ValueObject\OrderId;
+use App\Domain\Product\Port\MsAdapter\ProductMsAdapter;
 
 class OrderService
 {
     public function __construct(
         private OrderRepository $orderRepository,
+        private ProductMsAdapter $productMsAdapter
     ) {
 
     }
     
     public function createOrder(Order $order): Order
     {
+        $order = $this->populateOrderItemsPrice($order);
         return $this->orderRepository->createOrder($order);
     }
 
@@ -76,5 +79,18 @@ class OrderService
         $order = $this->getOrderById($orderId);
 
         return $this->orderRepository->removeOrderItems($order->getOrderId(), $items);
+    }
+
+    public function populateOrderItemsPrice(Order $order): Order
+    {
+        $productIdsCollection = $order->getOrderDetails()->getProductIds();
+        $productCollection = $this->productMsAdapter->getProductsById($productIdsCollection);
+
+        foreach($order->getOrderDetails()->getItems() as $item){
+            $product = $productCollection->findById($item->getProductId());
+            $item->setPriceInCents($product->getPriceInCents());
+        }
+
+        return $order;
     }
 }
