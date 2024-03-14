@@ -34,7 +34,7 @@ class OrderItem implements \JsonSerializable
         return $this->quantity;
     }
 
-    public function getPriceInCents(): int
+    public function getPriceInCents(): ?int
     {
         return $this->priceInCents;
     }
@@ -42,6 +42,12 @@ class OrderItem implements \JsonSerializable
     public function getDiscountInCents(): ?int
     {
         return $this->discountInCents;
+    }
+
+    public function setPriceInCents(?int $priceInCents): OrderItem
+    {
+        $this->priceInCents = $priceInCents;
+        return $this;
     }
 
     private function validate(): void{

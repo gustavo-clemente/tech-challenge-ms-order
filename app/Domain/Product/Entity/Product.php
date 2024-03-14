@@ -14,8 +14,18 @@ class Product
         private ProductCategoryId $categoryId,
         private string $name,
         private int $priceInCents,
-        private ?string $description,
-        private ?string $imagePath
+        private ?string $description = null,
+        private ?string $imagePath = null
     ) {
+    }
+
+    public function getProductId(): ProductId
+    {
+        return $this->productId;
+    }
+
+    public function getPriceInCents(): int
+    {
+        return $this->priceInCents;
     }
 }

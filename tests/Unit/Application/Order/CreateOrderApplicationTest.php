@@ -18,6 +18,7 @@ class CreateOrderApplicationTest extends TestCase
         $data = [
             'orderDetails' => [
                 'storeId' => '1',
+                'customerId' => '1',
                 'items' => [
                     [
                         "productId" => '1',

@@ -46,7 +46,7 @@ class EloquentOrderMapper
         return new OrderModel([
             "id" => $order->getOrderId()?->getIdentifier(),
             "store_id" => $order->getOrderDetails()->getStoreId()->getIdentifier(),
-            "customer_id" => $order->getOrderDetails()->getCustomerId()->getIdentifier(),
+            "customer_id" => $order->getOrderDetails()->getCustomerId()?->getIdentifier(),
             "status" => $orderStatus ? $orderStatus->value : OrderStatus::CREATED->value,
             "prevision_delivery_date" =>  $order->getOrderDetails()->getPrevisionDeliveryDate() ?
                                           Carbon::parse($order->getOrderDetails()->getPrevisionDeliveryDate()) :

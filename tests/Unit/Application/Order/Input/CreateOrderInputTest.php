@@ -15,6 +15,7 @@ class CreateOrderInputTest extends TestCase
     {
         $orderDetails = [
             'storeId' => '1',
+            'customerId' => '1',
             'items' => [
                 [
                     "productId" => '1',
@@ -40,8 +41,10 @@ class CreateOrderInputTest extends TestCase
         $orderItems = $order->getOrderDetails()->getItems();
         $orderItems = iterator_to_array($orderItems);
         $storeId = $order->getOrderDetails()->getStoreId();
+        $customerId = $order->getOrderDetails()->getCustomerId();
 
         $this->assertEquals($orderDetails['storeId'], $storeId->getIdentifier());
+        $this->assertEquals($orderDetails['customerId'], $customerId->getIdentifier());
         $this->assertCount(count($orderDetails['items']), $orderItems);
 
         $this->assertEquals($orderDetails['items'][0]['quantity'], $orderItems[0]->getQuantity());
@@ -67,6 +70,7 @@ class CreateOrderInputTest extends TestCase
         return [
             'without storeId' => [
                 'orderDetails' => [
+                    'customerId' => "1",
                     'items' => [
                         [
                             'productId' => "1",
@@ -86,6 +90,7 @@ class CreateOrderInputTest extends TestCase
             'item without quantity' => [
                 'orderDetails' => [
                     'storeId' => '1',
+                    'customerId' => '1',
                     'items' => [
                         [
                             'productId' => "1",
@@ -105,12 +110,33 @@ class CreateOrderInputTest extends TestCase
             'item without productId' => [
                 'orderDetails' => [
                     'storeId' => '1',
+                    'customerId' => '1',
                     'items' => [
                         [
                             'productId' => "1",
                             'quantity' => 1
                         ],
                         [
+                            'quantity' => 1
+                        ],
+                        [
+                            'productId' => "3",
+                            'quantity' => 1
+                        ]
+                    ]
+                ]
+            ],
+            'item without customerId' => [
+                'orderDetails' => [
+                    'storeId' => '1',
+                    'customerId' => '1',
+                    'items' => [
+                        [
+                            'productId' => "1",
+                            'quantity' => 1
+                        ],
+                        [
+                            'productId' => "2",
                             'quantity' => 1
                         ],
                         [

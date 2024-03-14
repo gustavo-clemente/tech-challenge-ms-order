@@ -52,7 +52,7 @@ class Order implements \JsonSerializable
             'orderId' => $this->orderId->getIdentifier(),
             'orderDetails' => $this->orderDetails->jsonSerialize(),
             'createdAt' => $this->createdAt->format('Y-m-d H:i:s'),
-            'orderPaymentDetails' => $this->orderPaymentDetails->jsonSerialize()
+            'orderPaymentDetails' => $this->orderPaymentDetails?->jsonSerialize()
          ];
     }
 }
