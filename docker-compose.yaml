@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: ms-order
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    command: ["--host", "0.0.0.0"]
+    env_file: ./.env
+    environment:
+      DB_HOST: database
+    networks:
+      - api-network
+    depends_on:
+      - database
+      - rabbitmq  # Adicionando dependência para o RabbitMQ
+  database:
+    container_name: database
+    image: postgres:16.2
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - api-network
+    volumes:
+      - tech-challenge-database:/var/lib/postgresql/data
+
+  rabbitmq:  # Adicionando o serviço RabbitMQ
+    image: rabbitmq:3.8-management
+    ports:
+      - "5672:5672"  # Porta para conexões AMQP
+      - "15672:15672"  # Porta para o painel de controle do RabbitMQ (opcional)
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq  # Volume para persistir os dados do RabbitMQ
+
+networks:
+  api-network:
+    driver: bridge
+
+volumes:
+  tech-challenge-database:
+  rabbitmq_data:  # Adicionando o volume para dados do RabbitMQ
