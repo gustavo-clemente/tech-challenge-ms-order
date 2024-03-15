@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('order_payments', function (Blueprint $table) {
             $table->uuid()->primary();
             $table->foreignUuid('order_id')->references('id')->on('orders')->cascadeOnDelete();
-            $table->uuid('external_payment_id');
+            $table->string('external_payment_id', 36);
             $table->enum('status', [
                 'PENDING',
                 'PROCESSING',

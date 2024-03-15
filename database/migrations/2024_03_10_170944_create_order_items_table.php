@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('product_id');
+            $table->string('product_id', 36);
             $table->foreignUuid('order_id')->references('id')->on('orders')->cascadeOnDelete();
             $table->integer('quantity');
             $table->integer('price_in_cents');

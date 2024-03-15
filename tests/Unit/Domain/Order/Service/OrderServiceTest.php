@@ -12,6 +12,7 @@ use App\Domain\Order\Enum\OrderStatus;
 use App\Domain\Order\Exception\CheckoutOrderStatusException;
 use App\Domain\Order\Exception\OrderNotCancelableException;
 use App\Domain\Order\Exception\OrderNotFoundException;
+use App\Domain\Order\Port\Producer\CheckoutOrderProducer;
 use App\Domain\Order\Port\Repository\OrderRepository;
 use App\Domain\Order\Service\OrderService;
 use App\Domain\Order\ValueObject\Item\OrderItemId;
@@ -19,7 +20,6 @@ use App\Domain\Order\ValueObject\OrderDetails;
 use App\Domain\Order\ValueObject\OrderId;
 use App\Domain\Product\Entity\Product;
 use App\Domain\Product\Entity\ProductCollection;
-use App\Domain\Product\Entity\ProductIdCollection;
 use App\Domain\Product\Port\MsAdapter\ProductMsAdapter;
 use App\Domain\Product\ValueObject\ProductCategoryId;
 use App\Domain\Product\ValueObject\ProductId;
@@ -29,6 +29,12 @@ use Tests\TestCase;
 
 class OrderServiceTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->mock(CheckoutOrderProducer::class);
+    }
     public function test_createOrder_return_order(): void
     {
         $productIds = [
@@ -50,8 +56,6 @@ class OrderServiceTest extends TestCase
                 priceInCents: 30000
             ),
         ]);
-
-        $productIdsColection = new ProductIdCollection($productIds);
 
         $order = new Order(
             orderDetails: new OrderDetails(
@@ -227,6 +231,13 @@ class OrderServiceTest extends TestCase
               ->with($order->getOrderId())
               ->andReturn($order);
 
+        });
+
+        $this->mock(CheckoutOrderProducer::class, function (MockInterface $mock) use($order){
+            $mock
+              ->shouldReceive('publish')
+              ->once()
+              ->with($order);
         });
 
         $order = app(OrderService::class)->checkoutOrder($order->getOrderId());

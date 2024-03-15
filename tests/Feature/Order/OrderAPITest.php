@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class OrderAPITest extends TestCase
 {
-    const BASE_URL = "/order";
+    const BASE_URL = "/api/order";
 
     use RefreshDatabase;
 

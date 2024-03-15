@@ -11,6 +11,7 @@ use App\Domain\Order\Enum\OrderStatus;
 use App\Domain\Order\Exception\CheckoutOrderStatusException;
 use App\Domain\Order\Exception\OrderNotCancelableException;
 use App\Domain\Order\Exception\OrderNotFoundException;
+use App\Domain\Order\Port\Producer\CheckoutOrderProducer;
 use App\Domain\Order\Port\Repository\OrderRepository;
 use App\Domain\Order\ValueObject\OrderId;
 use App\Domain\Product\Port\MsAdapter\ProductMsAdapter;
@@ -19,7 +20,8 @@ class OrderService
 {
     public function __construct(
         private OrderRepository $orderRepository,
-        private ProductMsAdapter $productMsAdapter
+        private ProductMsAdapter $productMsAdapter,
+        private CheckoutOrderProducer $checkoutOrderProducer
     ) {
 
     }
@@ -51,7 +53,11 @@ class OrderService
             );
         }
 
-        return $this->orderRepository->checkoutOrder($order->getOrderId());
+        $checkoutOrder =  $this->orderRepository->checkoutOrder($order->getOrderId());
+
+        $this->checkoutOrderProducer->publish($checkoutOrder);
+
+        return $checkoutOrder;
     }
 
     public function cancelOrder(OrderId $orderId): Order
