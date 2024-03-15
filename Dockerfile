@@ -1,4 +1,4 @@
-FROM php:8.2-alpine
+FROM php:8.1-alpine
 
 EXPOSE 8000
 
@@ -13,9 +13,10 @@ RUN apk --no-cache add \
     zlib-dev \
     sqlite-dev \
     libzip-dev \
-    && docker-php-ext-install zip
+    postgresql-dev \
+    && docker-php-ext-install zip bcmath sockets 
 
-RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install pdo_pgsql
 RUN docker-php-ext-install pdo_sqlite
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"

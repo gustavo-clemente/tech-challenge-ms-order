@@ -12,6 +12,7 @@ services:
     env_file: ./.env
     environment:
       DB_HOST: database
+      RABBITMQ_HOST: rabbitmq
     networks:
       - api-network
     depends_on:
@@ -38,8 +39,10 @@ services:
       - "5672:5672"  # Porta para conexões AMQP
       - "15672:15672"  # Porta para o painel de controle do RabbitMQ (opcional)
     environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    networks:
+      - api-network
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq  # Volume para persistir os dados do RabbitMQ
 
