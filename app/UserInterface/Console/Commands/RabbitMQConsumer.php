@@ -2,8 +2,11 @@
 
 namespace App\UserInterface\Console\Commands;
 
+use App\Application\Shared\Handler\RabbitMQMessageHandler;
 use Illuminate\Console\Command;
+use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AbstractConnection;
+use PhpAmqpLib\Message\AMQPMessage;
 
 class RabbitMQConsumer extends Command
 {
@@ -11,44 +14,71 @@ class RabbitMQConsumer extends Command
 
     protected $description = 'Command description';
 
+    private string $queue;
+
+    public function __construct(
+        private AbstractConnection $connection
+    ) {
+        parent::__construct();
+    }
+
     public function handle()
     {
-        /** @var AbstractConnection */
-        $connection = app(AbstractConnection::class);
-        $queue = $this->argument('queue');
-        $handler = config('rabbitmq-handlers.' . $queue);
+        $this->queue = $this->argument('queue');
+
+        $handler = $this->getHandler();
+
+        $channel = $this->createChannel();
+
+        $this->declareQueue($channel);
+        $this->listenForMessages($channel, $handler);
+
+        $this->cleanUp($channel);
+     
+    }
+
+    private function getHandler(): RabbitMQMessageHandler
+    {
+        $handler = config('rabbitmq-handlers.' . $this->queue);
 
         if (!class_exists($handler)) {
-            $this->error("Handler not found for queue: $queue");
-            return;
+            throw new \RuntimeException("Handler not found for queue: $this->queue");
         }
 
-        $handlerClass = app($handler);
+        return app($handler);
+    }
 
-        $channel = $connection->channel();
+    private function createChannel(): AMQPChannel
+    {
+        $channel = $this->connection->channel();
 
-        // Declare a fila da qual vamos consumir mensagens
-        $channel->queue_declare($queue, false, true, false, false);
+        return $channel;
+    }
 
-        echo " [*] Waiting for messages. To exit press CTRL+C\n";
+    private function declareQueue(AMQPChannel $channel): void
+    {
+        $channel->queue_declare($this->queue, false, true, false, false);
+    }
 
-        $callback = function ($msg) {
-            echo ' [x] Received ', $msg->getBody(), "\n";
-            sleep(substr_count($msg->getBody(), '.'));
-            echo " [x] Done\n";
-        };
+    private function listenForMessages(AMQPChannel $channel, RabbitMQMessageHandler $handler): void
+    {
+        $this->line(" [*] Waiting for messages on '{$this->queue}'. To exit press CTRL+C\n");
 
-        // Registre o consumidor no canal para começar a receber mensagens
-        $channel->basic_consume($queue, '', false, true, false, false, [$handlerClass, 'handler']);
+        $channel->basic_consume($this->queue, '', false, true, false, false, function(AMQPMessage $message) use($handler) {
+            $response = $handler->handler($message);
+            $this->line(json_encode($response->getResponse()));
+        });
 
         try {
             $channel->consume();
         } catch (\Throwable $exception) {
-            echo $exception->getMessage();
+            $this->error($exception->getMessage());
         }
+    }
 
-        // Feche o canal e a conexão ao finalizar o consumo
+    private function cleanUp(AMQPChannel $channel): void
+    {
         $channel->close();
-        $connection->close();
+        $this->connection->close();
     }
 }

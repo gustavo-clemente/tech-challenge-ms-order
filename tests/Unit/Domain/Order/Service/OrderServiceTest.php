@@ -305,8 +305,12 @@ class OrderServiceTest extends TestCase
         $this->assertInstanceOf(Order::class, $order);
     }
 
-    public function test_cancel_order_return_cancelled_order(): void
-    {
+    /**
+     * @dataProvider provide_order_valid_status_for_cancelation
+     */
+    public function test_cancel_order_return_cancelled_order(
+        OrderStatus $orderStatus
+    ): void {
         $order = new Order(
             orderId: new OrderId("111"),
             orderDetails: new OrderDetails(
@@ -318,7 +322,7 @@ class OrderServiceTest extends TestCase
                         priceInCents: 10000
                     )
                     ]),
-                orderStatus: OrderStatus::CREATED
+                orderStatus: $orderStatus
             )
         );
 
@@ -365,9 +369,9 @@ class OrderServiceTest extends TestCase
     }
 
     /**
-     * @dataProvider provide_order_status_for_checkout_test
+     * @dataProvider provide_order_invalid_status_for_cancelation
      */
-    public function test_cancel_order_throw_exception_when_status_diferent_from_created(
+    public function test_cancel_order_throw_exception_when_status_is_invalid_for_cancelation(
         OrderStatus $orderStatus
         ): void {
         $this->expectException(OrderNotCancelableException::class);
@@ -408,6 +412,46 @@ class OrderServiceTest extends TestCase
 
         foreach(OrderStatus::cases() as $orderStatus){
             if($orderStatus === OrderStatus::CREATED) {
+                continue;
+            }
+
+            $cases[$orderStatus->name] = [$orderStatus];
+        }
+
+        return $cases;
+    }
+
+    public static function provide_order_invalid_status_for_cancelation(): array
+    {
+        $validStatus = [
+            OrderStatus::CREATED,
+            OrderStatus::AWAITING_PAYMENT,
+        ];
+
+        $cases = [];
+
+        foreach(OrderStatus::cases() as $orderStatus){
+            if(in_array($orderStatus, $validStatus)) {
+                continue;
+            }
+
+            $cases[$orderStatus->name] = [$orderStatus];
+        }
+
+        return $cases;
+    }
+
+    public static function provide_order_valid_status_for_cancelation(): array
+    {
+        $validStatus = [
+            OrderStatus::CREATED,
+            OrderStatus::AWAITING_PAYMENT,
+        ];
+
+        $cases = [];
+
+        foreach(OrderStatus::cases() as $orderStatus){
+            if(!in_array($orderStatus, $validStatus)) {
                 continue;
             }
 

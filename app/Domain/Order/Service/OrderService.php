@@ -64,9 +64,11 @@ class OrderService
     {
         $order = $this->getOrderById($orderId);
 
-        if($order->getOrderDetails()->getOrderStatus() !== OrderStatus::CREATED){
+        if(!$this->isOrderValidForCancelation($order)){
+            $orderStatus = $order->getOrderDetails()->getOrderStatus()->value;
+
             throw new OrderNotCancelableException(
-                "Unable to proceed with cancel. The order is not in the 'created' status."
+                "Unable to proceed with cancel. The order is not in a valid cancel status. Order status: {$orderStatus}"
             );
         }
 
@@ -98,5 +100,20 @@ class OrderService
         }
 
         return $order;
+    }
+
+    private function isOrderValidForCancelation(Order $order): bool
+    {
+        $validStatus =  $this->getValidStatusForCancel();
+
+        return in_array($order->getOrderDetails()->getOrderStatus(), $validStatus);
+    }
+
+    private function getValidStatusForCancel(): array
+    {
+        return [
+            OrderStatus::CREATED,
+            OrderStatus::AWAITING_PAYMENT
+        ];
     }
 }
