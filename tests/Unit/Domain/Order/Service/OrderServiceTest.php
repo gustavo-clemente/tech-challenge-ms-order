@@ -12,7 +12,10 @@ use App\Domain\Order\Enum\OrderStatus;
 use App\Domain\Order\Exception\CheckoutOrderStatusException;
 use App\Domain\Order\Exception\OrderNotCancelableException;
 use App\Domain\Order\Exception\OrderNotFoundException;
+use App\Domain\Order\Exception\OrderStatusInvalidForPreparationException;
 use App\Domain\Order\Port\Producer\CheckoutOrderProducer;
+use App\Domain\Order\Port\Producer\OrderProducer;
+use App\Domain\Order\Port\Producer\StartOrderPreparationProducer;
 use App\Domain\Order\Port\Repository\OrderRepository;
 use App\Domain\Order\Service\OrderService;
 use App\Domain\Order\ValueObject\Item\OrderItemId;
@@ -24,6 +27,7 @@ use App\Domain\Product\Port\MsAdapter\ProductMsAdapter;
 use App\Domain\Product\ValueObject\ProductCategoryId;
 use App\Domain\Product\ValueObject\ProductId;
 use App\Domain\Store\Entity\StoreId;
+use Mockery;
 use Mockery\MockInterface;
 use Tests\TestCase;
 
@@ -33,7 +37,7 @@ class OrderServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->mock(CheckoutOrderProducer::class);
+        $this->mock(OrderProducer::class);
     }
     public function test_createOrder_return_order(): void
     {
@@ -233,9 +237,9 @@ class OrderServiceTest extends TestCase
 
         });
 
-        $this->mock(CheckoutOrderProducer::class, function (MockInterface $mock) use($order){
+        $this->mock(OrderProducer::class, function (MockInterface $mock) use($order){
             $mock
-              ->shouldReceive('publish')
+              ->shouldReceive('publishOrderForPayment')
               ->once()
               ->with($order);
         });
@@ -268,7 +272,7 @@ class OrderServiceTest extends TestCase
     }
 
     /**
-     * @dataProvider provide_order_status_for_checkout_test
+     * @dataProvider provide_order_invalid_status_for_checkout_test
      */
     public function test_checkout_order_throw_exception_when_status_diferent_from_created(
         OrderStatus $orderStatus
@@ -303,6 +307,21 @@ class OrderServiceTest extends TestCase
         $order = app(OrderService::class)->checkoutOrder($order->getOrderId());
 
         $this->assertInstanceOf(Order::class, $order);
+    }
+
+    public static function provide_order_invalid_status_for_checkout_test(): array
+    {
+        $cases = [];
+
+        foreach(OrderStatus::cases() as $orderStatus){
+            if($orderStatus === OrderStatus::CREATED) {
+                continue;
+            }
+
+            $cases[$orderStatus->name] = [$orderStatus];
+        }
+
+        return $cases;
     }
 
     /**
@@ -406,21 +425,6 @@ class OrderServiceTest extends TestCase
         $this->assertInstanceOf(Order::class, $order);
     }
 
-    public static function provide_order_status_for_checkout_test(): array
-    {
-        $cases = [];
-
-        foreach(OrderStatus::cases() as $orderStatus){
-            if($orderStatus === OrderStatus::CREATED) {
-                continue;
-            }
-
-            $cases[$orderStatus->name] = [$orderStatus];
-        }
-
-        return $cases;
-    }
-
     public static function provide_order_invalid_status_for_cancelation(): array
     {
         $validStatus = [
@@ -452,6 +456,108 @@ class OrderServiceTest extends TestCase
 
         foreach(OrderStatus::cases() as $orderStatus){
             if(!in_array($orderStatus, $validStatus)) {
+                continue;
+            }
+
+            $cases[$orderStatus->name] = [$orderStatus];
+        }
+
+        return $cases;
+    }
+
+    public function test_start_order_preparation_return_order(
+    ): void {
+        $order = new Order(
+            orderId: new OrderId("111"),
+            orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
+                items: new OrderItemCollection([
+                    new OrderItem(
+                        productId: new ProductId('111'),
+                        quantity:1,
+                        priceInCents: 10000
+                    )
+                    ]),
+                orderStatus: OrderStatus::AWAITING_PAYMENT,
+            )
+        );
+
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order){
+            $mock
+              ->shouldReceive('getOrderById')
+              ->once()
+              ->with($order->getOrderId())
+              ->andReturn($order);
+
+              $mock
+              ->shouldReceive('updateOrderStatus')
+              ->once()
+              ->with($order->getOrderId(), OrderStatus::IN_PREPARATION)
+              
+              ->andReturn($order);
+
+        });
+
+        $this->mock(OrderProducer::class, function (MockInterface $mock) use($order){
+            $mock
+              ->shouldReceive('publishOrderForPreparation')
+              ->with($order)
+              ->once();
+        });
+
+        $order = app(OrderService::class)->startOrderPreparation($order->getOrderId());
+
+        $this->assertInstanceOf(Order::class, $order);
+    }
+
+    /**
+     * @dataProvider provide_order_invalid_status_for_preparation
+     */
+    public function test_start_order_preparation_throw_exception_when_status_is_invalid_for_preparation(
+        OrderStatus $orderStatus
+        ): void {
+        $this->expectException(OrderStatusInvalidForPreparationException::class);
+        $order = new Order(
+            orderId: new OrderId("111"),
+            orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
+                items: new OrderItemCollection([
+                    new OrderItem(
+                        productId: new ProductId('111'),
+                        quantity:1,
+                        priceInCents: 10000
+                    )
+                    ]),
+                orderStatus: $orderStatus
+            )
+        );
+        
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order){
+            $mock
+              ->shouldReceive('getOrderById')
+              ->once()
+              ->with($order->getOrderId())
+              ->andReturn($order);
+
+              $mock
+              ->shouldNotReceive('updateOrderStatus');
+        });
+
+        $order = app(OrderService::class)->startOrderPreparation($order->getOrderId());
+
+        $this->assertInstanceOf(Order::class, $order);
+    }
+
+    public static function provide_order_invalid_status_for_preparation(): array
+    {
+        $validStatus = [
+            OrderStatus::AWAITING_PAYMENT,
+        ];
+
+        $cases = [];
+
+        foreach(OrderStatus::cases() as $orderStatus){
+            if(in_array($orderStatus, $validStatus)) {
                 continue;
             }
 

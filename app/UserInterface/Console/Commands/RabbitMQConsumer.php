@@ -2,6 +2,8 @@
 
 namespace App\UserInterface\Console\Commands;
 
+use App\Application\Order\Handler\RabbitMQCancelOrderHandler;
+use App\Application\Order\Handler\RabbitMQPaidOrderHandler;
 use App\Application\Shared\Handler\RabbitMQMessageHandler;
 use Illuminate\Console\Command;
 use PhpAmqpLib\Channel\AMQPChannel;
@@ -16,14 +18,20 @@ class RabbitMQConsumer extends Command
 
     private string $queue;
 
+    private array $queueHandlers;
+
+    private AbstractConnection $connection;
+    
     public function __construct(
-        private AbstractConnection $connection
+
     ) {
         parent::__construct();
-    }
 
+        $this->queueHandlers = $this->getQueueHandlers();
+    }
     public function handle()
     {
+        $this->connection = app(AbstractConnection::class);
         $this->queue = $this->argument('queue');
 
         $handler = $this->getHandler();
@@ -39,9 +47,9 @@ class RabbitMQConsumer extends Command
 
     private function getHandler(): RabbitMQMessageHandler
     {
-        $handler = config('rabbitmq-handlers.' . $this->queue);
+        $handler = $this->queueHandlers[$this->queue] ?? null;
 
-        if (!class_exists($handler)) {
+        if (is_null($handler)) {
             throw new \RuntimeException("Handler not found for queue: $this->queue");
         }
 
@@ -80,5 +88,13 @@ class RabbitMQConsumer extends Command
     {
         $channel->close();
         $this->connection->close();
+    }
+
+    private function getQueueHandlers(): array
+    {
+        return [
+            config('rabbitmq.cancel_order_queue') => RabbitMQCancelOrderHandler::class,
+            config('rabbitmq.paid_order_queue') => RabbitMQPaidOrderHandler::class
+        ];
     }
 }

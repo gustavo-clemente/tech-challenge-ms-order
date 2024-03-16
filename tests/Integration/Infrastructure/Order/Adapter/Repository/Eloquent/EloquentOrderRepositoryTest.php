@@ -16,6 +16,7 @@ use App\Domain\Order\ValueObject\OrderId;
 use App\Domain\Product\ValueObject\ProductId;
 use App\Domain\Store\Entity\StoreId;
 use App\Infrastructure\Order\Adapter\Repository\Eloquent\EloquentOrderRepository;
+use App\Infrastructure\Order\Mapper\Eloquent\EloquentOrderMapper;
 use App\Infrastructure\Order\Model\Eloquent\OrderItemModel;
 use App\Infrastructure\Order\Model\Eloquent\OrderModel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -142,12 +143,50 @@ class EloquentOrderRepositoryTest extends TestCase
         ]);
     }
 
-    public function test_add_order_items_create_new_items(): void
+    /**
+     * @dataProvider  provide_order_status
+     */
+    public function test_change_order_status_alter_order_status(OrderStatus $orderStatus): void
     {
         $orderModel = OrderModel::factory()->createOne([
             'status' => OrderStatus::CREATED->value
         ]);
 
+        
+        OrderItemModel::factory(3)->create([
+            'order_id' => $orderModel->id
+        ]);
+        
+        $orderId = new OrderId($orderModel->id);
+
+        $order = app(EloquentOrderRepository::class)->updateOrderStatus($orderId, $orderStatus);
+
+        $this->assertInstanceOf(Order::class, $order);
+        $this->assertEquals($orderStatus->value, $order->getOrderDetails()->getOrderStatus()->value);
+
+        $this->assertDatabaseHas('orders', [
+            'id' => $orderModel->id,
+            'status' => $orderStatus->value
+        ]);
+    }
+
+    public static function provide_order_status(): array
+    {
+        $cases = [];
+
+        foreach(OrderStatus::cases() as $orderStatus){
+            $cases[$orderStatus->name] = [$orderStatus];
+        }
+
+        return $cases;
+    }
+
+    public function test_add_order_items_create_new_items(): void
+    {
+        $orderModel = OrderModel::factory()->createOne([
+            'status' => OrderStatus::CREATED->value
+        ]);
+        
         $orderId = new OrderId($orderModel->id);
         $orderItemCollection = new OrderItemCollection([
             new OrderItem(

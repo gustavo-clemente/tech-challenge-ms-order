@@ -4,6 +4,7 @@ declare(strict_types= 1);
 
 namespace App\Domain\Order\Entity;
 
+use App\Domain\Order\Enum\OrderStatus;
 use App\Domain\Order\Exception\EmptyOrderException;
 use App\Domain\Order\ValueObject\OrderDetails;
 use App\Domain\Order\ValueObject\OrderId;
@@ -35,6 +36,16 @@ class Order implements \JsonSerializable
     public function getCreatedAt(): ?DateTime
     {
         return $this->createdAt;
+    }
+
+    public function isCheckoutAllowed(): bool
+    {
+        return $this->getOrderDetails()->getOrderStatus() === OrderStatus::CREATED;
+    }
+
+    public function isPreparationAllowed(): bool
+    {
+        return $this->getOrderDetails()->getOrderStatus() === OrderStatus::AWAITING_PAYMENT;
     }
 
     private function validate(): void

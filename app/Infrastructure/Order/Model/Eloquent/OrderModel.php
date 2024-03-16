@@ -23,8 +23,14 @@ class OrderModel extends Model
         'customer_id',
         'prevision_delivery_date',
         'status',
-        'total_in_cents'
+        'total_in_cents',
     ];
+
+    protected $casts = [
+        'prevision_delivery_date' => 'datetime'
+    ];
+
+    protected $primaryKey = 'id';
 
     public function items(): HasMany
     {

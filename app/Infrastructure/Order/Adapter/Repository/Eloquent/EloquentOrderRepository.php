@@ -97,7 +97,7 @@ class EloquentOrderRepository implements OrderRepository
         return $this->eloquentOrderMapper->mapToDomain($orderModel);
     }
 
-    private function updateOrderStatus(OrderId $orderId, OrderStatus $orderStatus): ?Order
+    public function updateOrderStatus(OrderId $orderId, OrderStatus $orderStatus): ?Order
     {
         $orderModel = OrderModel::find($orderId->getIdentifier());
 

@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use PhpAmqpLib\Message\AMQPMessage;
 
-class RabbitMQCancelOrderHandler implements RabbitMQMessageHandler
+class RabbitMQPaidOrderHandler implements RabbitMQMessageHandler
 {
     public function __construct(
         private OrderService $orderService
@@ -32,8 +32,8 @@ class RabbitMQCancelOrderHandler implements RabbitMQMessageHandler
             $orderId = new OrderId($messageBody['orderId']);
 
             return new RabbitMQOrderOutput(
-                $this->orderService->cancelOrder($orderId),
-                "order successfully canceled"
+                $this->orderService->startOrderPreparation($orderId),
+                "Order preparation started successfully"
             );
 
         } catch (OrderException $exception) {

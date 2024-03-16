@@ -11,7 +11,8 @@ use App\Domain\Order\Enum\OrderStatus;
 use App\Domain\Order\Exception\CheckoutOrderStatusException;
 use App\Domain\Order\Exception\OrderNotCancelableException;
 use App\Domain\Order\Exception\OrderNotFoundException;
-use App\Domain\Order\Port\Producer\CheckoutOrderProducer;
+use App\Domain\Order\Exception\OrderStatusInvalidForPreparationException;
+use App\Domain\Order\Port\Producer\OrderProducer;
 use App\Domain\Order\Port\Repository\OrderRepository;
 use App\Domain\Order\ValueObject\OrderId;
 use App\Domain\Product\Port\MsAdapter\ProductMsAdapter;
@@ -21,7 +22,7 @@ class OrderService
     public function __construct(
         private OrderRepository $orderRepository,
         private ProductMsAdapter $productMsAdapter,
-        private CheckoutOrderProducer $checkoutOrderProducer
+        private OrderProducer $orderProducer
     ) {
 
     }
@@ -55,7 +56,7 @@ class OrderService
 
         $checkoutOrder =  $this->orderRepository->checkoutOrder($order->getOrderId());
 
-        $this->checkoutOrderProducer->publish($checkoutOrder);
+        $this->orderProducer->publishOrderForPayment($checkoutOrder);
 
         return $checkoutOrder;
     }
@@ -73,6 +74,23 @@ class OrderService
         }
 
         return $this->orderRepository->cancelOrder($orderId);
+    }
+
+    public function startOrderPreparation(OrderId $orderId): Order
+    {
+        $order = $this->getOrderById($orderId);
+
+        if(!$order->isPreparationAllowed()){
+            throw new OrderStatusInvalidForPreparationException(
+                "Unable to start preparation. The order is not in the 'awaiting_payment' status."
+            );
+        }
+
+        $inPreparationOrder = $this->orderRepository->updateOrderStatus($order->getOrderId(), OrderStatus::IN_PREPARATION);
+
+        $this->orderProducer->publishOrderForPreparation($inPreparationOrder);
+
+        return $inPreparationOrder;
     }
 
     public function addOrderItems(OrderId $orderId, OrderItemCollection $items): Order

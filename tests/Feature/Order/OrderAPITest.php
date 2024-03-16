@@ -61,6 +61,8 @@ class OrderAPITest extends TestCase
                 'orderDetails',
                 fn (AssertableJson $json) =>
                   $json->hasAll([
+                    'amountInCents',
+                    'amountInReal',
                     'storeId',
                     'customerId',
                     'items',
@@ -101,6 +103,8 @@ class OrderAPITest extends TestCase
                 'orderDetails',
                 fn (AssertableJson $json) =>
                   $json->hasAll([
+                    'amountInCents',
+                    'amountInReal',
                     'storeId',
                     'customerId',
                     'items',
@@ -143,6 +147,8 @@ class OrderAPITest extends TestCase
                 'orderDetails',
                 fn (AssertableJson $json) =>
                   $json->hasAll([
+                    'amountInCents',
+                    'amountInReal',
                     'storeId',
                     'customerId',
                     'items',
@@ -192,6 +198,8 @@ class OrderAPITest extends TestCase
                 'orderDetails',
                 fn (AssertableJson $json) =>
                   $json->hasAll([
+                    'amountInCents',
+                    'amountInReal',
                     'storeId',
                     'customerId',
                     'items',
