@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Order\Input;
 
-use App\Application\Mapper\OrderItemMapper;
+use App\Application\Order\Mapper\OrderItemMapper;
 use App\Domain\Order\Entity\Item\OrderItemIdCollection;
 use App\Domain\Order\ValueObject\OrderId;
 use Illuminate\Support\Facades\Validator;

@@ -4,7 +4,7 @@ declare(strict_types= 1);
 
 namespace App\Application\Order\Input;
 
-use App\Application\Mapper\OrderItemMapper;
+use App\Application\Order\Mapper\OrderItemMapper;
 use App\Domain\Customer\Entity\CustomerId;
 use App\Domain\Order\Entity\Item\OrderItemCollection;
 use App\Domain\Order\Entity\Order;

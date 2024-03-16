@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Mapper;
+namespace App\Application\Order\Mapper;
 
 use App\Domain\Order\Entity\Item\OrderItem;
 use App\Domain\Order\Entity\Item\OrderItemCollection;
