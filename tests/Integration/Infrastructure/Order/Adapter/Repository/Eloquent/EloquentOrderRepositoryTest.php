@@ -58,6 +58,11 @@ class EloquentOrderRepositoryTest extends TestCase
         $this->assertDatabaseCount('orders', 1);
         $this->assertDatabaseCount('order_items', 2);
 
+        $this->assertDatabaseHas('orders', [
+            'id' => $orderCreated->getOrderId()->getIdentifier(),
+            'total_in_cents' => $orderCreated->getOrderDetails()->getTotalAmountInCents(),
+        ]);
+        
         $this->assertDatabaseHas('order_items', [
             'order_id' => $orderCreated->getOrderId()->getIdentifier()
         ]);

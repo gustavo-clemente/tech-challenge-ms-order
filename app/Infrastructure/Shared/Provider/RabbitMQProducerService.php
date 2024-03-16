@@ -18,7 +18,8 @@ class RabbitMQProducerService extends ServiceProvider
                 config('rabbitmq.host'),
                 config('rabbitmq.port'),
                 config('rabbitmq.user'),
-                config('rabbitmq.password')
+                config('rabbitmq.password'),
+                config('rabbitmq.vhost')
             );
         });
     }

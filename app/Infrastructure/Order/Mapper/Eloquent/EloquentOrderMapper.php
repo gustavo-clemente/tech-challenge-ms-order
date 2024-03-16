@@ -50,7 +50,8 @@ class EloquentOrderMapper
             "status" => $orderStatus ? $orderStatus->value : OrderStatus::CREATED->value,
             "prevision_delivery_date" =>  $order->getOrderDetails()->getPrevisionDeliveryDate() ?
                                           Carbon::parse($order->getOrderDetails()->getPrevisionDeliveryDate()) :
-                                          null
+                                          null,
+            "total_in_cents" => $order->getOrderDetails()->getTotalAmountInCents()
         ]);
     }
     

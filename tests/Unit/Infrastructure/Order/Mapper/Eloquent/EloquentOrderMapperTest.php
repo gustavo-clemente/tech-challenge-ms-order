@@ -99,6 +99,13 @@ class EloquentOrderMapperTest extends TestCase
                         quantity: 10,
                         priceInCents: 50000,
                         discountInCents: 30000
+                    ),
+                    new OrderItem(
+                        id: new OrderItemId(uniqid()),
+                        productId: new ProductId(uniqid()),
+                        quantity: 5,
+                        priceInCents: 25000,
+                        discountInCents: 30000
                     )
                 ]),
                 orderStatus: $status,
@@ -118,6 +125,7 @@ class EloquentOrderMapperTest extends TestCase
             $orderModel->prevision_delivery_date
         );
         $this->assertEquals($order->getOrderDetails()->getOrderStatus()->value, $orderModel->status);
+        $this->assertEquals($order->getOrderDetails()->getTotalAmountInCents(), $orderModel->total_in_cents);
     }
 
     private function createOrderMock(

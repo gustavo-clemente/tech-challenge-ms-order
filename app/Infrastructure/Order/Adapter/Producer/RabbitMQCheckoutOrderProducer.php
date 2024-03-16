@@ -11,11 +11,14 @@ class RabbitMQCheckoutOrderProducer extends RabbitMQProducer implements Checkout
 {
     public function publish(Order $order): void
     {
-        $this->channel->queue_declare(config("rabbitmq.checkout_queue"), false, true, false, false);
+        $this->channel->queue_declare(config("rabbitmq.awaiting_payment_queue"), false, true, false, false);
 
-        $orderMessage = new AMQPMessage(json_encode($order->jsonSerialize()));
+        $orderMessage = new AMQPMessage(json_encode([
+            'orderId' => $order->getOrderId()->getIdentifier(),
+            'amount' => $order->getOrderDetails()->getTotalAmountInReal()
+        ]));
 
-        $this->channel->basic_publish($orderMessage, '', config("rabbitmq.checkout_queue"));
+        $this->channel->basic_publish($orderMessage, config("rabbitmq.awaiting_payment_exchange"), config("rabbitmq.default_key"));
     }
 
     public function __destruct()
