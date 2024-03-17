@@ -29,9 +29,4 @@ class RabbitMQProducerService extends ServiceProvider implements DeferrableProvi
     {
         return [AbstractConnection::class];
     }
-
-    public function isDeferred(): bool
-    {
-        return true;
-    }
 }
