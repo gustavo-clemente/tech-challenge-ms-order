@@ -13,4 +13,6 @@ enum OrderStatus: string
     case RECEIVED = 'RECEIVED';
     case AWAITING_PAYMENT = 'AWAITING_PAYMENT';
 
+    case PREPARATION_FINISHED = 'PREPARATION_FINISHED';
+
 }

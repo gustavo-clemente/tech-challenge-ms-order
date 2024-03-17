@@ -7,6 +7,7 @@ namespace App\Domain\Order\ValueObject;
 use App\Domain\Customer\Entity\CustomerId;
 use App\Domain\Order\Entity\Item\OrderItemCollection;
 use App\Domain\Order\Enum\OrderStatus;
+use App\Domain\Order\Exception\Item\ItemWithouPriceException;
 use App\Domain\Product\Entity\ProductIdCollection;
 use App\Domain\Store\Entity\StoreId;
 use DateTime;
@@ -64,9 +65,38 @@ class OrderDetails implements \JsonSerializable
         return new ProductIdCollection($productIds);
     }
 
+    public function getTotalAmountInCents(): int
+    {
+        $totalAmount = 0;
+        $totalDiscountedPrice = 0;
+
+        foreach($this->items as $item) {
+            if(!$item->getPriceInCents()){
+                throw new ItemWithouPriceException(
+                    "Cannot calculate total amount without item price verification", 
+                    500
+                );
+            }
+
+            $totalAmount += ($item->getPriceInCents() * $item->getQuantity());
+            $totalDiscountedPrice += $item->getDiscountInCents() ?? 0;
+        }
+
+        return $totalAmount - $totalDiscountedPrice;
+    }
+
+    public function getTotalAmountInReal(): float
+    {
+        $totalAmountInCents = $this->getTotalAmountInCents();
+
+        return $totalAmountInCents / 100;
+    }
+
     public function jsonSerialize(): array
     {
         return [
+            'amountInCents' => $this->getTotalAmountInCents(),
+            'amountInReal' => $this->getTotalAmountInReal(),
             'storeId' => $this->storeId->getIdentifier(),
             'items' => $this->items->jsonSerialize(),
             'orderStatus' => $this->orderStatus?->value,

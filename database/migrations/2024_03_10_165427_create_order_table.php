@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('store_id');
-            $table->uuid('customer_id');
+            $table->string('store_id', 36);
+            $table->string('customer_id', 36);
             $table->dateTime('prevision_delivery_date')->nullable();
             $table->enum('status', [
                 'CREATED',
@@ -22,7 +22,8 @@ return new class extends Migration
                 'DELIVERED',
                 'CANCELED',
                 'RECEIVED',
-                'AWAITING_PAYMENT'
+                'AWAITING_PAYMENT',
+                'PREPARATION_FINISHED'
             ])->default('CREATED');
             $table->integer('total_in_cents')->nullable();
             $table->timestamps();
@@ -34,6 +35,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('orders');
+        Schema::enableForeignKeyConstraints();
     }
 };

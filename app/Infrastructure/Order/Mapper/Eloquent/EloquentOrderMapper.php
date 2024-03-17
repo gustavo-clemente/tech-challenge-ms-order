@@ -11,7 +11,6 @@ use App\Domain\Order\ValueObject\OrderDetails;
 use App\Domain\Order\ValueObject\OrderId;
 use App\Domain\Store\Entity\StoreId;
 use App\Infrastructure\Order\Model\Eloquent\OrderModel;
-use Carbon\Carbon;
 
 class EloquentOrderMapper
 {
@@ -32,7 +31,7 @@ class EloquentOrderMapper
                 items: $this->orderitemMapper->mapToDomainCollection($orderModel->items),
                 orderStatus: OrderStatus::from($orderModel->status),
                 previsionDeliveryDate: $previsionDeliveryDate ?
-                                       new \DateTime($previsionDeliveryDate) :
+                                       new \DateTime($previsionDeliveryDate->toDateTimeString()) :
                                        null
             ),
             createdAt: new \DateTime($orderModel->created_at->toDateTimeString()),
@@ -48,9 +47,9 @@ class EloquentOrderMapper
             "store_id" => $order->getOrderDetails()->getStoreId()->getIdentifier(),
             "customer_id" => $order->getOrderDetails()->getCustomerId()?->getIdentifier(),
             "status" => $orderStatus ? $orderStatus->value : OrderStatus::CREATED->value,
-            "prevision_delivery_date" =>  $order->getOrderDetails()->getPrevisionDeliveryDate() ?
-                                          Carbon::parse($order->getOrderDetails()->getPrevisionDeliveryDate()) :
-                                          null
+            "prevision_delivery_date" =>  $order->getOrderDetails()->getPrevisionDeliveryDate() ?? null,
+            "total_in_cents" => $order->getOrderDetails()->getTotalAmountInCents(),
+            "created_at" => $order->getCreatedAt() ?? null
         ]);
     }
     

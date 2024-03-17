@@ -2,7 +2,7 @@
 
 declare(strict_types= 1);
 
-namespace Tests\Unit\Domain\Order\Item;
+namespace Tests\Unit\Domain\Order\Entity\Item;
 
 use App\Domain\Order\Entity\Item\OrderItem;
 use App\Domain\Order\Entity\Item\OrderItemCollection;

@@ -6,10 +6,21 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+
 jobs:
-  test:
-    name: Run tests
+  test-and-scan:
+    name: Test and Scan
     runs-on: ubuntu-latest
+
+    services:
+      rabbitmq:
+        image: rabbitmq:3.8-management
+        ports:
+          - "5672:5672"
+          - "15672:15672"
+        env:
+          RABBITMQ_DEFAULT_USER: teste
+          RABBITMQ_DEFAULT_PASS: teste
 
     steps:
       - name: Checkout repository
@@ -22,17 +33,13 @@ jobs:
           extensions: xdebug
 
       - name: Install dependencies
-        run: composer install --no-progress --no-suggest --no-interaction
-
-      - name: Run tests
-        run: php artisan test
-
-      - name: Run tests coverage
-        run: php artisan test --coverage-clover=coverage.xml
+        run: |
+          composer install --no-progress --no-suggest --no-interaction
+          php artisan test
+          php artisan test --coverage-clover=coverage.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

@@ -13,6 +13,7 @@ use App\Domain\Product\ValueObject\ProductId;
 use App\Infrastructure\Order\Model\Eloquent\OrderItemModel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Ramsey\Uuid\Uuid;
 
 class EloquentOrderitemMapper
 {
@@ -43,7 +44,7 @@ class EloquentOrderitemMapper
         $orderItemId = $orderItem->getId();
 
         return new OrderItemModel([
-            'id' => $orderItemId ? $orderItemId->getIdentifier() : uniqid(),
+            'id' => $orderItemId ? $orderItemId->getIdentifier() : Uuid::uuid4(),
             'order_id' => $orderId->getIdentifier(),
             'product_id' => $orderItem->getProductId()->getIdentifier(),
             'quantity' => $orderItem->getQuantity(),

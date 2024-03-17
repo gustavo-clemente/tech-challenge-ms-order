@@ -7,6 +7,7 @@ namespace App\Domain\Order\Port\Repository;
 use App\Domain\Order\Entity\Item\OrderItemCollection;
 use App\Domain\Order\Entity\Item\OrderItemIdCollection;
 use App\Domain\Order\Entity\Order;
+use App\Domain\Order\Enum\OrderStatus;
 use App\Domain\Order\ValueObject\OrderId;
 
 interface OrderRepository
@@ -17,4 +18,7 @@ interface OrderRepository
     public function cancelOrder(OrderId $orderId): ?Order;
     public function addOrderItems(OrderId $orderId, OrderItemCollection $orderItems): ?Order;
     public function removeOrderItems(OrderId $orderId, OrderItemIdCollection $orderItemsId): ?Order;
+
+    public function updateOrderStatus(OrderId $orderId, OrderStatus $orderStatus): ?Order;
+    
 }

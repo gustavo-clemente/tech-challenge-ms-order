@@ -4,11 +4,9 @@ declare(strict_types= 1);
 
 namespace App\Application\Order\Input;
 
-use App\Application\Mapper\OrderItemMapper;
-use App\Domain\Order\Entity\Item\OrderItem;
+use App\Application\Order\Mapper\OrderItemMapper;
 use App\Domain\Order\Entity\Item\OrderItemCollection;
 use App\Domain\Order\ValueObject\OrderId;
-use App\Domain\Product\ValueObject\ProductId;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 

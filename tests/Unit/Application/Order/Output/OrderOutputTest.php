@@ -79,6 +79,8 @@ class OrderOutputTest extends TestCase
             $orderDetails->getPrevisionDeliveryDate()->format('Y-m-d H:i:s'),
             $jsonOrderDetails['previsionDeliveryDate']
         );
+        $this->assertEquals($orderDetails->getTotalAmountInCents(), $jsonOrderDetails['amountInCents']);
+        $this->assertEquals($orderDetails->getTotalAmountInReal(), $jsonOrderDetails['amountInReal']);
 
         $this->assertEquals(
             $jsonOrderItems[0]['orderItemId'],

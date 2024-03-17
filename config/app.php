@@ -170,6 +170,7 @@ return [
         App\Infrastructure\Laravel\Providers\RouteServiceProvider::class,
         App\Infrastructure\Order\Provider\OrderServiceProvider::class,
         App\Infrastructure\Product\Provider\ProductServiceProvider::class,
+        App\Infrastructure\Shared\Provider\RabbitMQProducerService::class,
     ])->toArray(),
 
     /*

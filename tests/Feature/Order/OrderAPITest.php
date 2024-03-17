@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class OrderAPITest extends TestCase
 {
-    const BASE_URL = "/order";
+    const BASE_URL = "/api/order";
 
     use RefreshDatabase;
 
@@ -61,6 +61,8 @@ class OrderAPITest extends TestCase
                 'orderDetails',
                 fn (AssertableJson $json) =>
                   $json->hasAll([
+                    'amountInCents',
+                    'amountInReal',
                     'storeId',
                     'customerId',
                     'items',
@@ -101,6 +103,8 @@ class OrderAPITest extends TestCase
                 'orderDetails',
                 fn (AssertableJson $json) =>
                   $json->hasAll([
+                    'amountInCents',
+                    'amountInReal',
                     'storeId',
                     'customerId',
                     'items',
@@ -143,6 +147,8 @@ class OrderAPITest extends TestCase
                 'orderDetails',
                 fn (AssertableJson $json) =>
                   $json->hasAll([
+                    'amountInCents',
+                    'amountInReal',
                     'storeId',
                     'customerId',
                     'items',
@@ -192,6 +198,8 @@ class OrderAPITest extends TestCase
                 'orderDetails',
                 fn (AssertableJson $json) =>
                   $json->hasAll([
+                    'amountInCents',
+                    'amountInReal',
                     'storeId',
                     'customerId',
                     'items',
@@ -209,6 +217,57 @@ class OrderAPITest extends TestCase
         $this->assertDatabaseHas("orders", [
             'id' => $orderModelId,
             'status' => OrderStatus::CANCELLED->value
+        ]);
+    }
+
+    public function test_finish_order_change_order_status(): void
+    {
+        $orderModel = OrderModel::factory()->createOne([
+            'status' => OrderStatus::IN_PREPARATION->value
+        ]);
+
+        $orderModelId = $orderModel->id;
+
+        OrderItemModel::factory(2)->create([
+            'order_id' => $orderModelId
+        ]);
+
+        $baseUrl = self::BASE_URL;
+
+        $response = $this->patch("{$baseUrl}/{$orderModelId}/finish");
+
+        $response->assertStatus(Response::HTTP_OK);
+
+        $response->assertJson(
+            fn (AssertableJson $json) =>
+              $json->hasAll([
+                'orderId',
+                'orderDetails',
+                'createdAt',
+                'orderPaymentDetails'
+            ])->has(
+                'orderDetails',
+                fn (AssertableJson $json) =>
+                  $json->hasAll([
+                    'amountInCents',
+                    'amountInReal',
+                    'storeId',
+                    'customerId',
+                    'items',
+                    'orderStatus',
+                    'previsionDeliveryDate'
+                  ])->has(
+                    'items',
+                    2
+                  )
+            )
+        );
+
+        $this->assertDatabaseCount("orders", 1);
+        $this->assertDatabaseCount("order_items", 2);
+        $this->assertDatabaseHas("orders", [
+            'id' => $orderModelId,
+            'status' => OrderStatus::PREPARATION_FINISHED->value
         ]);
     }
 }
