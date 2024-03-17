@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Order\Handler\Output;
-use App\Application\Shared\Handler\Output\RabbitMQMessageHandlerOutput;
-use App\Application\Shared\Handler\RabbitMQMessageHandler;
+namespace App\Application\Order\Handler\RabbitMQ\Output;
+use App\Application\Shared\Handler\RabbitMQ\Output\RabbitMQMessageHandlerOutput;
 
 class RabbitMQMessageExceptionOutput implements RabbitMQMessageHandlerOutput
 {

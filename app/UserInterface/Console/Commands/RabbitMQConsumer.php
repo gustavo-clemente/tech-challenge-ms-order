@@ -2,9 +2,9 @@
 
 namespace App\UserInterface\Console\Commands;
 
-use App\Application\Order\Handler\RabbitMQCancelOrderHandler;
-use App\Application\Order\Handler\RabbitMQPaidOrderHandler;
-use App\Application\Shared\Handler\RabbitMQMessageHandler;
+use App\Application\Order\Handler\RabbitMQ\RabbitMQCancelOrderHandler;
+use App\Application\Order\Handler\RabbitMQ\RabbitMQPaidOrderHandler;
+use App\Application\Shared\Handler\RabbitMQ\RabbitMQMessageHandler;
 use Illuminate\Console\Command;
 use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Connection\AbstractConnection;
@@ -21,10 +21,9 @@ class RabbitMQConsumer extends Command
     private array $queueHandlers;
 
     private AbstractConnection $connection;
-    
-    public function __construct(
 
-    ) {
+    public function __construct()
+    {
         parent::__construct();
 
         $this->queueHandlers = $this->getQueueHandlers();
@@ -42,7 +41,6 @@ class RabbitMQConsumer extends Command
         $this->listenForMessages($channel, $handler);
 
         $this->cleanUp($channel);
-     
     }
 
     private function getHandler(): RabbitMQMessageHandler
@@ -72,7 +70,7 @@ class RabbitMQConsumer extends Command
     {
         $this->line(" [*] Waiting for messages on '{$this->queue}'. To exit press CTRL+C\n");
 
-        $channel->basic_consume($this->queue, '', false, true, false, false, function(AMQPMessage $message) use($handler) {
+        $channel->basic_consume($this->queue, '', false, true, false, false, function (AMQPMessage $message) use ($handler) {
             $response = $handler->handler($message);
             $this->line(json_encode($response->getResponse()));
         });

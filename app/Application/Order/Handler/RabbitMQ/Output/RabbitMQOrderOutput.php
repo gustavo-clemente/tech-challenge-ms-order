@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Order\Handler\Output;
-use App\Application\Shared\Handler\Output\RabbitMQMessageHandlerOutput;
+namespace App\Application\Order\Handler\RabbitMQ\Output;
+use App\Application\Shared\Handler\RabbitMQ\Output\RabbitMQMessageHandlerOutput;
 use App\Domain\Order\Entity\Order;
 
 class RabbitMQOrderOutput implements RabbitMQMessageHandlerOutput

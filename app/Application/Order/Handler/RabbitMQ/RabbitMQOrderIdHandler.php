@@ -2,13 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Order\Handler;
+namespace App\Application\Order\Handler\RabbitMQ;
 
-use App\Application\Order\Handler\Output\RabbitMQCancelOrderOutput;
-use App\Application\Order\Handler\Output\RabbitMQMessageExceptionOutput;
-use App\Application\Order\Handler\Output\RabbitMQOrderOutput;
-use App\Application\Shared\Handler\Output\RabbitMQMessageHandlerOutput;
-use App\Application\Shared\Handler\RabbitMQMessageHandler;
+use App\Application\Order\Handler\RabbitMQ\Output\RabbitMQMessageExceptionOutput;
+use App\Application\Shared\Handler\RabbitMQ\Output\RabbitMQMessageHandlerOutput;
+use App\Application\Shared\Handler\RabbitMQ\RabbitMQMessageHandler;
 use App\Domain\Order\Exception\OrderException;
 use App\Domain\Order\Service\OrderService;
 use App\Domain\Order\ValueObject\OrderId;
@@ -16,12 +14,15 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use PhpAmqpLib\Message\AMQPMessage;
 
-class RabbitMQPaidOrderHandler implements RabbitMQMessageHandler
+abstract class RabbitMQOrderIdHandler implements RabbitMQMessageHandler
 {
     public function __construct(
-        private OrderService $orderService
+        protected OrderService $orderService
     ) {
     }
+
+    abstract protected function handlerAction(OrderId $orderId): RabbitMQMessageHandlerOutput;
+
     public function handler(AMQPMessage $message): RabbitMQMessageHandlerOutput
     {
         try {
@@ -31,10 +32,7 @@ class RabbitMQPaidOrderHandler implements RabbitMQMessageHandler
 
             $orderId = new OrderId($messageBody['orderId']);
 
-            return new RabbitMQOrderOutput(
-                $this->orderService->startOrderPreparation($orderId),
-                "Order preparation started successfully"
-            );
+            return $this->handlerAction($orderId);
 
         } catch (OrderException $exception) {
             $orderIdentifier = $orderId->getIdentifier();
