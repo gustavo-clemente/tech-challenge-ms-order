@@ -87,7 +87,10 @@ class OrderService
             );
         }
 
-        $inPreparationOrder = $this->orderRepository->updateOrderStatus($order->getOrderId(), OrderStatus::IN_PREPARATION);
+        $inPreparationOrder = $this->orderRepository->updateOrderStatus(
+            $order->getOrderId(), 
+            OrderStatus::IN_PREPARATION
+        );
 
         $this->orderProducer->publishOrderForPreparation($inPreparationOrder);
 
@@ -104,7 +107,10 @@ class OrderService
             );
         }
 
-        $finishedOrder = $this->orderRepository->updateOrderStatus($order->getOrderId(), OrderStatus::PREPARATION_FINISHED);
+        $finishedOrder = $this->orderRepository->updateOrderStatus(
+            $order->getOrderId(), 
+            OrderStatus::PREPARATION_FINISHED
+        );
 
         $this->orderProducer->publishFinishedOrder($order);
 

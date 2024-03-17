@@ -15,7 +15,7 @@ class RabbitMQProducerService extends ServiceProvider implements DeferrableProvi
 
     public function register()
     {
-        $this->app->singleton(AbstractConnection::class, function (Application $app) {
+        $this->app->singleton(AbstractConnection::class, function () {
             return new AMQPStreamConnection(
                 config('rabbitmq.host'),
                 config('rabbitmq.port'),

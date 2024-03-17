@@ -72,7 +72,10 @@ class OrderDetails implements \JsonSerializable
 
         foreach($this->items as $item) {
             if(!$item->getPriceInCents()){
-                throw new ItemWithouPriceException("Cannot calculate total amount without item price verification", 500);
+                throw new ItemWithouPriceException(
+                    "Cannot calculate total amount without item price verification", 
+                    500
+                );
             }
 
             $totalAmount += ($item->getPriceInCents() * $item->getQuantity());

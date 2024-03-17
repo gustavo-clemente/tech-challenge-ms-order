@@ -56,9 +56,7 @@ class RabbitMQConsumer extends Command
 
     private function createChannel(): AMQPChannel
     {
-        $channel = $this->connection->channel();
-
-        return $channel;
+        return $this->connection->channel();
     }
 
     private function declareQueue(AMQPChannel $channel): void
@@ -70,10 +68,18 @@ class RabbitMQConsumer extends Command
     {
         $this->line(" [*] Waiting for messages on '{$this->queue}'. To exit press CTRL+C\n");
 
-        $channel->basic_consume($this->queue, '', false, true, false, false, function (AMQPMessage $message) use ($handler) {
-            $response = $handler->handler($message);
-            $this->line(json_encode($response->getResponse()));
-        });
+        $channel->basic_consume(
+            $this->queue,
+            '',
+            false,
+            true,
+            false,
+            false,
+            function (AMQPMessage $message) use ($handler) {
+                $response = $handler->handler($message);
+                $this->line(json_encode($response->getResponse()));
+            }
+        );
 
         try {
             $channel->consume();
