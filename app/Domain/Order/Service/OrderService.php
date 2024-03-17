@@ -49,7 +49,7 @@ class OrderService
     {
         $order = $this->getOrderById($orderId);
         
-        if($order->getOrderDetails()->getOrderStatus() !== OrderStatus::CREATED){
+        if(!$order->isCheckoutAllowed()){
             throw new CheckoutOrderStatusException(
                 "Unable to proceed with checkout. The order is not in the 'created' status."
             );
