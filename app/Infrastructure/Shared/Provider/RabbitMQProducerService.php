@@ -7,7 +7,6 @@ namespace App\Infrastructure\Shared\Provider;
 use Illuminate\Support\ServiceProvider;
 use PhpAmqpLib\Connection\AbstractConnection;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Support\DeferrableProvider;
 
 class RabbitMQProducerService extends ServiceProvider implements DeferrableProvider
@@ -24,15 +23,5 @@ class RabbitMQProducerService extends ServiceProvider implements DeferrableProvi
                 config('rabbitmq.vhost')
             );
         });
-    }
-
-    public function provides(): array
-    {
-        return [AbstractConnection::class];
-    }
-
-    public function isDeferred(): bool
-    {
-        return true;
     }
 }
