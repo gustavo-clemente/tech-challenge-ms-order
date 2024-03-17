@@ -11,6 +11,7 @@ use App\Domain\Order\Enum\OrderStatus;
 use App\Domain\Order\Exception\CheckoutOrderStatusException;
 use App\Domain\Order\Exception\OrderNotCancelableException;
 use App\Domain\Order\Exception\OrderNotFoundException;
+use App\Domain\Order\Exception\OrderStatusInvalidForFinishException;
 use App\Domain\Order\Exception\OrderStatusInvalidForPreparationException;
 use App\Domain\Order\Port\Producer\OrderProducer;
 use App\Domain\Order\Port\Repository\OrderRepository;
@@ -91,6 +92,23 @@ class OrderService
         $this->orderProducer->publishOrderForPreparation($inPreparationOrder);
 
         return $inPreparationOrder;
+    }
+
+    public function finishOrderPreparation(OrderId $orderId): Order
+    {
+        $order = $this->getOrderById($orderId);
+
+        if(!$order->isFinishedAllowed()){
+            throw new OrderStatusInvalidForFinishException(
+                "Unable to finish preparation. The order is not in the 'in_preparation' status."
+            );
+        }
+
+        $finishedOrder = $this->orderRepository->updateOrderStatus($order->getOrderId(), OrderStatus::PREPARATION_FINISHED);
+
+        $this->orderProducer->publishFinishedOrder($order);
+
+        return $finishedOrder;
     }
 
     public function addOrderItems(OrderId $orderId, OrderItemCollection $items): Order

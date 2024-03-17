@@ -14,7 +14,7 @@ class RabbitMQConsumer extends Command
 {
     protected $signature = 'rabbitmq:consume {queue}';
 
-    protected $description = 'Command description';
+    protected $description = 'Listen to a RabbitMQ queue';
 
     private string $queue;
 

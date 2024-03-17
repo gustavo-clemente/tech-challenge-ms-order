@@ -13,14 +13,21 @@ class RabbitMQOrderProducer extends RabbitMQProducer implements OrderProducer
 {
     public function publishOrderForPayment(Order $order): bool
     {
-        $this->channel->queue_declare(config("rabbitmq.awaiting_payment_queue"), false, true, false, false);
+        $exchange = config("rabbitmq.awaiting_payment_exchange");
+        $queue = config("rabbitmq.awaiting_payment_queue");
+        $defaultKey = config("rabbitmq.default_key");
+
+        $this->channel->exchange_declare($exchange, 'direct', false, true, false);
+
+        $this->channel->queue_declare($queue, false, true, false, false);
+
+        $this->channel->queue_bind($queue, $exchange, $defaultKey);
 
         $orderMessage = new AMQPMessage(json_encode([
-            'orderId' => $order->getOrderId()->getIdentifier(),
-            'amount' => $order->getOrderDetails()->getTotalAmountInReal()
+            'orderId' => $order->getOrderId()->getIdentifier()
         ]));
 
-        $this->channel->basic_publish($orderMessage, config("rabbitmq.awaiting_payment_exchange"), config("rabbitmq.default_key"));
+        $this->channel->basic_publish($orderMessage, $exchange, $defaultKey);
 
         return true;
     }
@@ -38,6 +45,28 @@ class RabbitMQOrderProducer extends RabbitMQProducer implements OrderProducer
         $this->channel->queue_bind($queue, $exchange, $defaultKey);
 
         $orderMessage = new AMQPMessage(json_encode($order->jsonSerialize()));
+
+        $this->channel->basic_publish($orderMessage, $exchange, $defaultKey);
+
+        return true;
+    }
+
+    public function publishFinishedOrder(Order $order): bool
+    {
+        $exchange = config("rabbitmq.ready_order_exchange");
+        $queue = config("rabbitmq.ready_order_queue");
+        $defaultKey = config("rabbitmq.default_key");
+        
+        $this->channel->exchange_declare($exchange, 'fanout');
+
+        $this->channel->queue_declare($queue, false, true, false, false);
+
+        $this->channel->queue_bind($queue, $exchange, $defaultKey);
+
+        $orderMessage = new AMQPMessage(json_encode([
+            'orderId' => $order->getOrderId()->getIdentifier(),
+            'customerId' => $order->getOrderDetails()->getCustomerId()->getIdentifier()
+        ]));
 
         $this->channel->basic_publish($orderMessage, $exchange, $defaultKey);
 

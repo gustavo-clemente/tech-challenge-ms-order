@@ -48,6 +48,11 @@ class Order implements \JsonSerializable
         return $this->getOrderDetails()->getOrderStatus() === OrderStatus::AWAITING_PAYMENT;
     }
 
+    public function isFinishedAllowed(): bool
+    {
+        return $this->getOrderDetails()->getOrderStatus() === OrderStatus::IN_PREPARATION;
+    }
+
     private function validate(): void
     {
         $totalItems = $this->orderDetails->getTotalItems();

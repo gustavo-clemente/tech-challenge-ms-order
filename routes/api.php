@@ -22,3 +22,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::resource("order", OrderController::class)->only(['store', 'show', 'destroy']);
 
 Route::patch('/order/{id}/checkout', [OrderController::class, 'checkout']);
+
+Route::patch('/order/{id}/finish', [OrderController::class, 'finish']);

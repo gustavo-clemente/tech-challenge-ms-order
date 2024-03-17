@@ -13,4 +13,6 @@ return [
     'paid_order_queue' => env('RABBITMQ_PAID_ORDER_QUEUE'),
     'prepare_order_queue' => env('RABBITMQ_PREPARE_ORDER_QUEUE'),
     'prepare_order_exchange' => env('RABBITMQ_PREPARE_ORDER_EXCHANGE'),
+    'ready_order_queue' => env('RABBITMQ_READY_ORDER_QUEUE'),
+    'ready_order_exchange' => env('RABBITMQ_READY_ORDER_EXCHANGE'),
 ];

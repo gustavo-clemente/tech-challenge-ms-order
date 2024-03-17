@@ -12,6 +12,7 @@ use App\Domain\Order\Enum\OrderStatus;
 use App\Domain\Order\Exception\CheckoutOrderStatusException;
 use App\Domain\Order\Exception\OrderNotCancelableException;
 use App\Domain\Order\Exception\OrderNotFoundException;
+use App\Domain\Order\Exception\OrderStatusInvalidForFinishException;
 use App\Domain\Order\Exception\OrderStatusInvalidForPreparationException;
 use App\Domain\Order\Port\Producer\CheckoutOrderProducer;
 use App\Domain\Order\Port\Producer\OrderProducer;
@@ -67,29 +68,29 @@ class OrderServiceTest extends TestCase
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: $productIds[0],
-                        quantity:1
+                        quantity: 1
                     ),
                     new OrderItem(
                         productId: $productIds[1],
-                        quantity:1
+                        quantity: 1
                     )
                 ])
             )
         );
 
-        $this->mock(ProductMsAdapter::class, function(MockInterface $mock) use($productCollection){
+        $this->mock(ProductMsAdapter::class, function (MockInterface $mock) use ($productCollection) {
             $mock
-              ->shouldReceive('getProductsById')
-              ->once()
-              ->andReturn($productCollection);
+                ->shouldReceive('getProductsById')
+                ->once()
+                ->andReturn($productCollection);
         });
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order){
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($order) {
             $mock
-              ->shouldReceive("createOrder")
-              ->with($order)
-              ->once()
-              ->andReturn($order);
-            });
+                ->shouldReceive("createOrder")
+                ->with($order)
+                ->once()
+                ->andReturn($order);
+        });
 
         $order = app(OrderService::class)->createOrder($order);
 
@@ -130,29 +131,29 @@ class OrderServiceTest extends TestCase
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: $productsForTest[0]['id'],
-                        quantity:1
+                        quantity: 1
                     ),
                     new OrderItem(
                         productId: $productsForTest[1]['id'],
-                        quantity:1
+                        quantity: 1
                     )
                 ])
             )
         );
 
-        $this->mock(ProductMsAdapter::class, function(MockInterface $mock) use($productCollection){
+        $this->mock(ProductMsAdapter::class, function (MockInterface $mock) use ($productCollection) {
             $mock
-              ->shouldReceive('getProductsById')
-              ->once()
-              ->andReturn($productCollection);
+                ->shouldReceive('getProductsById')
+                ->once()
+                ->andReturn($productCollection);
         });
-      
+
         $orderPopulated = app(OrderService::class)->populateOrderItemsPrice($order);
 
         $this->assertInstanceOf(Order::class, $order);
         $this->assertCount($order->getOrderDetails()->getItems()->count(), $orderPopulated->getOrderDetails()->getItems());
 
-        foreach($orderPopulated->getOrderDetails()->getItems() as $index => $item){
+        foreach ($orderPopulated->getOrderDetails()->getItems() as $index => $item) {
             $this->assertEquals($productsForTest[$index]['price'], $item->getPriceInCents());
         }
     }
@@ -166,19 +167,19 @@ class OrderServiceTest extends TestCase
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
-                        quantity:1,
+                        quantity: 1,
                         priceInCents: 10000
                     )
                 ])
             )
         );
-        
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order){
+
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($order) {
             $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($order->getOrderId())
-              ->andReturn($order);
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
         });
 
         $order = app(OrderService::class)->getOrderById($order->getOrderId());
@@ -192,12 +193,12 @@ class OrderServiceTest extends TestCase
 
         $orderId = new OrderId('111');
 
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($orderId){
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($orderId) {
             $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($orderId)
-              ->andReturn(null);
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($orderId)
+                ->andReturn(null);
         });
 
         $order = app(OrderService::class)->getOrderById($orderId);
@@ -214,34 +215,33 @@ class OrderServiceTest extends TestCase
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
-                        quantity:1,
+                        quantity: 1,
                         priceInCents: 10000
                     )
-                    ]),
+                ]),
                 orderStatus: OrderStatus::CREATED
             )
         );
-        
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order){
+
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($order) {
             $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($order->getOrderId())
-              ->andReturn($order);
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
 
-              $mock
-              ->shouldReceive('checkoutOrder')
-              ->once()
-              ->with($order->getOrderId())
-              ->andReturn($order);
-
+            $mock
+                ->shouldReceive('checkoutOrder')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
         });
 
-        $this->mock(OrderProducer::class, function (MockInterface $mock) use($order){
+        $this->mock(OrderProducer::class, function (MockInterface $mock) use ($order) {
             $mock
-              ->shouldReceive('publishOrderForPayment')
-              ->once()
-              ->with($order);
+                ->shouldReceive('publishOrderForPayment')
+                ->once()
+                ->with($order);
         });
 
         $order = app(OrderService::class)->checkoutOrder($order->getOrderId());
@@ -254,16 +254,16 @@ class OrderServiceTest extends TestCase
         $this->expectException(OrderNotFoundException::class);
 
         $orderId = new OrderId("111");
-        
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($orderId){
-            $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($orderId)
-              ->andReturn(null);
 
-              $mock
-              ->shouldNotReceive('checkoutOrder');
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($orderId) {
+            $mock
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($orderId)
+                ->andReturn(null);
+
+            $mock
+                ->shouldNotReceive('checkoutOrder');
         });
 
         $order = app(OrderService::class)->checkoutOrder($orderId);
@@ -276,7 +276,7 @@ class OrderServiceTest extends TestCase
      */
     public function test_checkout_order_throw_exception_when_status_diferent_from_created(
         OrderStatus $orderStatus
-        ): void {
+    ): void {
         $this->expectException(CheckoutOrderStatusException::class);
         $order = new Order(
             orderId: new OrderId("111"),
@@ -285,23 +285,23 @@ class OrderServiceTest extends TestCase
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
-                        quantity:1,
+                        quantity: 1,
                         priceInCents: 10000
                     )
-                    ]),
+                ]),
                 orderStatus: $orderStatus
             )
         );
-        
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order){
-            $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($order->getOrderId())
-              ->andReturn($order);
 
-              $mock
-              ->shouldNotReceive('checkoutOrder');
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($order) {
+            $mock
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
+
+            $mock
+                ->shouldNotReceive('checkoutOrder');
         });
 
         $order = app(OrderService::class)->checkoutOrder($order->getOrderId());
@@ -313,8 +313,8 @@ class OrderServiceTest extends TestCase
     {
         $cases = [];
 
-        foreach(OrderStatus::cases() as $orderStatus){
-            if($orderStatus === OrderStatus::CREATED) {
+        foreach (OrderStatus::cases() as $orderStatus) {
+            if ($orderStatus === OrderStatus::CREATED) {
                 continue;
             }
 
@@ -337,27 +337,26 @@ class OrderServiceTest extends TestCase
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
-                        quantity:1,
+                        quantity: 1,
                         priceInCents: 10000
                     )
-                    ]),
+                ]),
                 orderStatus: $orderStatus
             )
         );
 
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order){
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($order) {
             $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($order->getOrderId())
-              ->andReturn($order);
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
 
-              $mock
-              ->shouldReceive('cancelOrder')
-              ->once()
-              ->with($order->getOrderId())
-              ->andReturn($order);
-
+            $mock
+                ->shouldReceive('cancelOrder')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
         });
 
         $order = app(OrderService::class)->cancelOrder($order->getOrderId());
@@ -370,16 +369,16 @@ class OrderServiceTest extends TestCase
         $this->expectException(OrderNotFoundException::class);
 
         $orderId = new OrderId("111");
-        
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($orderId){
-            $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($orderId)
-              ->andReturn(null);
 
-              $mock
-              ->shouldNotReceive('cancelOrder');
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($orderId) {
+            $mock
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($orderId)
+                ->andReturn(null);
+
+            $mock
+                ->shouldNotReceive('cancelOrder');
         });
 
         $order = app(OrderService::class)->cancelOrder($orderId);
@@ -392,7 +391,7 @@ class OrderServiceTest extends TestCase
      */
     public function test_cancel_order_throw_exception_when_status_is_invalid_for_cancelation(
         OrderStatus $orderStatus
-        ): void {
+    ): void {
         $this->expectException(OrderNotCancelableException::class);
         $order = new Order(
             orderId: new OrderId("111"),
@@ -401,23 +400,23 @@ class OrderServiceTest extends TestCase
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
-                        quantity:1,
+                        quantity: 1,
                         priceInCents: 10000
                     )
-                    ]),
+                ]),
                 orderStatus: $orderStatus
             )
         );
-        
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order){
-            $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($order->getOrderId())
-              ->andReturn($order);
 
-              $mock
-              ->shouldNotReceive('cancelOrder');
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($order) {
+            $mock
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
+
+            $mock
+                ->shouldNotReceive('cancelOrder');
         });
 
         $order = app(OrderService::class)->cancelOrder($order->getOrderId());
@@ -434,8 +433,8 @@ class OrderServiceTest extends TestCase
 
         $cases = [];
 
-        foreach(OrderStatus::cases() as $orderStatus){
-            if(in_array($orderStatus, $validStatus)) {
+        foreach (OrderStatus::cases() as $orderStatus) {
+            if (in_array($orderStatus, $validStatus)) {
                 continue;
             }
 
@@ -454,8 +453,8 @@ class OrderServiceTest extends TestCase
 
         $cases = [];
 
-        foreach(OrderStatus::cases() as $orderStatus){
-            if(!in_array($orderStatus, $validStatus)) {
+        foreach (OrderStatus::cases() as $orderStatus) {
+            if (!in_array($orderStatus, $validStatus)) {
                 continue;
             }
 
@@ -465,8 +464,8 @@ class OrderServiceTest extends TestCase
         return $cases;
     }
 
-    public function test_start_order_preparation_return_order(
-    ): void {
+    public function test_start_order_preparation_return_order(): void
+    {
         $order = new Order(
             orderId: new OrderId("111"),
             orderDetails: new OrderDetails(
@@ -474,35 +473,34 @@ class OrderServiceTest extends TestCase
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
-                        quantity:1,
+                        quantity: 1,
                         priceInCents: 10000
                     )
-                    ]),
+                ]),
                 orderStatus: OrderStatus::AWAITING_PAYMENT,
             )
         );
 
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order){
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($order) {
             $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($order->getOrderId())
-              ->andReturn($order);
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
 
-              $mock
-              ->shouldReceive('updateOrderStatus')
-              ->once()
-              ->with($order->getOrderId(), OrderStatus::IN_PREPARATION)
-              
-              ->andReturn($order);
+            $mock
+                ->shouldReceive('updateOrderStatus')
+                ->once()
+                ->with($order->getOrderId(), OrderStatus::IN_PREPARATION)
 
+                ->andReturn($order);
         });
 
-        $this->mock(OrderProducer::class, function (MockInterface $mock) use($order){
+        $this->mock(OrderProducer::class, function (MockInterface $mock) use ($order) {
             $mock
-              ->shouldReceive('publishOrderForPreparation')
-              ->with($order)
-              ->once();
+                ->shouldReceive('publishOrderForPreparation')
+                ->with($order)
+                ->once();
         });
 
         $order = app(OrderService::class)->startOrderPreparation($order->getOrderId());
@@ -515,7 +513,7 @@ class OrderServiceTest extends TestCase
      */
     public function test_start_order_preparation_throw_exception_when_status_is_invalid_for_preparation(
         OrderStatus $orderStatus
-        ): void {
+    ): void {
         $this->expectException(OrderStatusInvalidForPreparationException::class);
         $order = new Order(
             orderId: new OrderId("111"),
@@ -524,23 +522,23 @@ class OrderServiceTest extends TestCase
                 items: new OrderItemCollection([
                     new OrderItem(
                         productId: new ProductId('111'),
-                        quantity:1,
+                        quantity: 1,
                         priceInCents: 10000
                     )
-                    ]),
+                ]),
                 orderStatus: $orderStatus
             )
         );
-        
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order){
-            $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($order->getOrderId())
-              ->andReturn($order);
 
-              $mock
-              ->shouldNotReceive('updateOrderStatus');
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($order) {
+            $mock
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
+
+            $mock
+                ->shouldNotReceive('updateOrderStatus');
         });
 
         $order = app(OrderService::class)->startOrderPreparation($order->getOrderId());
@@ -556,8 +554,109 @@ class OrderServiceTest extends TestCase
 
         $cases = [];
 
-        foreach(OrderStatus::cases() as $orderStatus){
-            if(in_array($orderStatus, $validStatus)) {
+        foreach (OrderStatus::cases() as $orderStatus) {
+            if (in_array($orderStatus, $validStatus)) {
+                continue;
+            }
+
+            $cases[$orderStatus->name] = [$orderStatus];
+        }
+
+        return $cases;
+    }
+
+    public function test_finish_order_preparation_return_order(): void
+    {
+        $order = new Order(
+            orderId: new OrderId("111"),
+            orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
+                items: new OrderItemCollection([
+                    new OrderItem(
+                        productId: new ProductId('111'),
+                        quantity: 1,
+                        priceInCents: 10000
+                    )
+                ]),
+                orderStatus: OrderStatus::IN_PREPARATION,
+            )
+        );
+
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($order) {
+            $mock
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
+
+            $mock
+                ->shouldReceive('updateOrderStatus')
+                ->once()
+                ->with($order->getOrderId(), OrderStatus::PREPARATION_FINISHED)
+
+                ->andReturn($order);
+        });
+
+        $this->mock(OrderProducer::class, function (MockInterface $mock) use ($order) {
+            $mock
+                ->shouldReceive('publishFinishedOrder')
+                ->with($order)
+                ->once();
+        });
+
+        $order = app(OrderService::class)->finishOrderPreparation($order->getOrderId());
+
+        $this->assertInstanceOf(Order::class, $order);
+    }
+
+    /**
+     * @dataProvider provide_order_invalid_status_for_finish
+     */
+    public function test_finish_order_preparation_throw_exception_when_status_is_invalid_for_finish(
+        OrderStatus $orderStatus
+    ): void {
+        $this->expectException(OrderStatusInvalidForFinishException::class);
+        $order = new Order(
+            orderId: new OrderId("111"),
+            orderDetails: new OrderDetails(
+                storeId: new StoreId('111'),
+                items: new OrderItemCollection([
+                    new OrderItem(
+                        productId: new ProductId('111'),
+                        quantity: 1,
+                        priceInCents: 10000
+                    )
+                ]),
+                orderStatus: $orderStatus
+            )
+        );
+
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($order) {
+            $mock
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
+
+            $mock
+                ->shouldNotReceive('updateOrderStatus');
+        });
+
+        $order = app(OrderService::class)->finishOrderPreparation($order->getOrderId());
+
+        $this->assertInstanceOf(Order::class, $order);
+    }
+
+    public static function provide_order_invalid_status_for_finish(): array
+    {
+        $validStatus = [
+            OrderStatus::IN_PREPARATION,
+        ];
+
+        $cases = [];
+
+        foreach (OrderStatus::cases() as $orderStatus) {
+            if (in_array($orderStatus, $validStatus)) {
                 continue;
             }
 
@@ -572,8 +671,8 @@ class OrderServiceTest extends TestCase
         $orderItems = new OrderItemCollection([
             new OrderItem(
                 productId: new ProductId('111'),
-                quantity:1,
-                priceInCents:1000
+                quantity: 1,
+                priceInCents: 1000
             )
         ]);
 
@@ -585,18 +684,18 @@ class OrderServiceTest extends TestCase
             )
         );
 
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order, $orderItems){
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($order, $orderItems) {
             $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($order->getOrderId())
-              ->andReturn($order);
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
 
             $mock
-              ->shouldReceive('addOrderItems')
-              ->once()
-              ->with($order->getOrderId(), $orderItems)
-              ->andReturn($order);
+                ->shouldReceive('addOrderItems')
+                ->once()
+                ->with($order->getOrderId(), $orderItems)
+                ->andReturn($order);
         });
 
         $order = app(OrderService::class)->addOrderItems($order->getOrderId(), $orderItems);
@@ -613,20 +712,20 @@ class OrderServiceTest extends TestCase
         $orderItems = new OrderItemCollection([
             new OrderItem(
                 productId: new ProductId('111'),
-                quantity:1,
-                priceInCents:1000
+                quantity: 1,
+                priceInCents: 1000
             )
         ]);
-        
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($orderId){
-            $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($orderId)
-              ->andReturn(null);
 
-              $mock
-              ->shouldNotReceive('addOrderItems');
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($orderId) {
+            $mock
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($orderId)
+                ->andReturn(null);
+
+            $mock
+                ->shouldNotReceive('addOrderItems');
         });
 
         $order = app(OrderService::class)->addOrderItems($orderId, $orderItems);
@@ -639,8 +738,8 @@ class OrderServiceTest extends TestCase
         $orderItems = new OrderItemCollection([
             new OrderItem(
                 productId: new ProductId('111'),
-                quantity:1,
-                priceInCents:1000
+                quantity: 1,
+                priceInCents: 1000
             )
         ]);
 
@@ -656,18 +755,18 @@ class OrderServiceTest extends TestCase
             )
         );
 
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($order, $orderItemsIds){
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($order, $orderItemsIds) {
             $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($order->getOrderId())
-              ->andReturn($order);
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($order->getOrderId())
+                ->andReturn($order);
 
             $mock
-              ->shouldReceive('removeOrderItems')
-              ->once()
-              ->with($order->getOrderId(), $orderItemsIds)
-              ->andReturn($order);
+                ->shouldReceive('removeOrderItems')
+                ->once()
+                ->with($order->getOrderId(), $orderItemsIds)
+                ->andReturn($order);
         });
 
         $order = app(OrderService::class)->removeOrderItems($order->getOrderId(), $orderItemsIds);
@@ -684,16 +783,16 @@ class OrderServiceTest extends TestCase
         $orderItemsIds = new OrderItemIdCollection([
             new OrderItemId(uniqid())
         ]);
-        
-        $this->mock(OrderRepository::class, function (MockInterface $mock) use($orderId){
-            $mock
-              ->shouldReceive('getOrderById')
-              ->once()
-              ->with($orderId)
-              ->andReturn(null);
 
-              $mock
-              ->shouldNotReceive('removeOrderItems');
+        $this->mock(OrderRepository::class, function (MockInterface $mock) use ($orderId) {
+            $mock
+                ->shouldReceive('getOrderById')
+                ->once()
+                ->with($orderId)
+                ->andReturn(null);
+
+            $mock
+                ->shouldNotReceive('removeOrderItems');
         });
 
         $order = app(OrderService::class)->removeOrderItems($orderId, $orderItemsIds);

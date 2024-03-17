@@ -22,7 +22,8 @@ return new class extends Migration
                 'DELIVERED',
                 'CANCELED',
                 'RECEIVED',
-                'AWAITING_PAYMENT'
+                'AWAITING_PAYMENT',
+                'PREPARATION_FINISHED'
             ])->default('CREATED');
             $table->integer('total_in_cents')->nullable();
             $table->timestamps();

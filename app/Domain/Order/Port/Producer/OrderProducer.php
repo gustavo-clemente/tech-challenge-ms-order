@@ -10,4 +10,5 @@ interface OrderProducer
 {
     public function publishOrderForPayment(Order $order): bool;
     public function publishOrderForPreparation(Order $order): bool;
+    public function publishFinishedOrder(Order $order): bool;
 }
