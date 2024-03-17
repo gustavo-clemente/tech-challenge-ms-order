@@ -87,7 +87,7 @@ class RabbitMQCancelOrderHandlerTest extends TestCase
         $orderId = '111';
 
         $message = new AMQPMessage(json_encode([
-            "invalidField" => $orderId
+            "orderId" => $orderId
         ]));
 
         $this->mock(OrderService::class, function (MockInterface $mock) {
